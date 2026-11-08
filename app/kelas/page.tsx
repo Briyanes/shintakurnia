@@ -12,11 +12,11 @@ export default async function Classes() {
   return (
     <PublicFrame>
       <main id="main" className="section catalog-page">
-        <span className="eyebrow">FIND YOUR FOCUS / PRIVATE 1-ON-1</span>
+        <span className="eyebrow">PROGRAM / KELAS PRIVAT 1-ON-1</span>
         <h1>
-          Ruang untuk
+          Pilih yang ingin
           <br />
-          <em>mengembangkan teknikmu.</em>
+          <em>kamu pelajari.</em>
         </h1>
         <p className="lead">
           Jelajahi program, kenali materinya, dan konsultasikan pilihan yang

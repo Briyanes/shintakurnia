@@ -40,9 +40,9 @@ export default function InquiryForm({
   if (reference)
     return (
       <div className="success-panel" role="status">
-        <span className="eyebrow">THANK YOU FOR REACHING OUT</span>
+        <span className="eyebrow">PERMINTAAN DITERIMA</span>
         <h2>
-          Langkah pertamamu
+          Permintaan konsultasi
           <br />
           <em>sudah tercatat.</em>
         </h2>

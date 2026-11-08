@@ -15,11 +15,11 @@ export default async function Consult({
     <PublicFrame>
       <main className="section consult-page" id="main">
         <div>
-          <span className="eyebrow">LET’S PLAN YOUR NEXT CHAPTER</span>
+          <span className="eyebrow">KONSULTASI KELAS</span>
           <h1>
-            Mulai dengan
+            Belajar apa
             <br />
-            <em>sebuah cerita.</em>
+            <em>berikutnya?</em>
           </h1>
           <p className="lead">
             Ceritakan tujuan belajarmu. Program, lokasi, dan jadwal kita

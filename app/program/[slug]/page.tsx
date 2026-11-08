@@ -9,7 +9,7 @@ import {
   UserRound,
 } from "lucide-react";
 import { readContent } from "@/lib/store";
-import { PublicFrame, Price, Art } from "@/components/site";
+import { PublicFrame, Price, ProgramSummary } from "@/components/site";
 export const dynamic = "force-dynamic";
 export async function generateMetadata({
   params,
@@ -85,7 +85,7 @@ export default async function Program({
             <p className="body-copy">{p.facilities}</p>
           </div>
           <aside className="booking-card">
-            {p.image ? <img src={p.image} alt={p.title} /> : <Art />}
+            {p.image ? <img src={p.image} alt={p.title} /> : <ProgramSummary />}
             <div>
               <span className="eyebrow">INVESTASI BELAJAR</span>
               <h2>

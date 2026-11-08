@@ -13,11 +13,11 @@ export default async function Gallery() {
   return (
     <PublicFrame>
       <main id="main" className="section gallery-page">
-        <span className="eyebrow">THE PROCESS / THE PRACTICE</span>
+        <span className="eyebrow">KARYA & PROSES BELAJAR</span>
         <h1>
-          Setiap proses,
+          Dokumentasi
           <br />
-          <em>punya ceritanya.</em>
+          <em>kelas & karya.</em>
         </h1>
         {photos.length ? (
           <div className="gallery">
@@ -30,7 +30,7 @@ export default async function Gallery() {
           </div>
         ) : (
           <section className="gallery-empty">
-            <span className="eyebrow">GALLERY IN PROGRESS</span>
+            <span className="eyebrow">GALERI</span>
             <h2>Dokumentasi sedang disiapkan.</h2>
             <p>
               Foto karya dan proses belajar belum tersedia di website baru.

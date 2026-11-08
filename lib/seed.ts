@@ -11,9 +11,9 @@ const common = {
 };
 export const seed: Content = {
   name: "Shinta Kurnia",
-  headline: "Your next chapter\nin hair artistry.",
+  headline: "Belajar rambut\nlangsung bersama Shinta.",
   intro:
-    "Kelas rambut privat 1-on-1. Kenali tekniknya, temukan gayamu, dan konsultasikan perjalanan belajarmu bersama Shinta.",
+    "Kelas privat 1-on-1 untuk mempelajari cutting, colouring, dan styling. Mulai dari pengalamanmu sekarang; program, waktu, dan lokasi kita bicarakan bersama.",
   bio: "Shinta Kurnia adalah penata rambut dengan pendekatan pembelajaran yang mudah dan santai, serta mengikuti perkembangan tren. Jelajahi program cutting, colouring, dan styling; konsultasikan level serta tujuan belajarmu sebelum menentukan kelas.",
   whatsapp: "6281231600479",
   location: "Lokasi fleksibel · berdasarkan kesepakatan",

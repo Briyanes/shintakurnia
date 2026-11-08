@@ -1,100 +1,83 @@
 import Link from "next/link";
-import {
-  ArrowUpRight,
-  ArrowDown,
-  MoveUpRight,
-  UserRound,
-  MapPin,
-  Scissors,
-} from "lucide-react";
+import { ArrowUpRight, MapPin } from "lucide-react";
 import { readContent } from "@/lib/store";
-import { Art, CTA, ProgramCard, PublicFrame } from "@/components/site";
+import { CTA, ProgramCard, PublicFrame } from "@/components/site";
 export const dynamic = "force-dynamic";
 export default async function Home() {
   const { data: c } = await readContent();
   return (
     <PublicFrame>
       <main id="main">
-        <section className="hero">
+        <section
+          className={`editorial-hero${c.portrait ? " with-portrait" : ""}`}
+        >
           <div className="hero-copy">
-            <span className="eyebrow">
-              <i /> PRIVATE HAIR EDUCATION · 1-ON-1
-            </span>
+            <span className="eyebrow">KELAS RAMBUT PRIVAT / SHINTA KURNIA</span>
             <h1>
-              {c.headline.split("\n").map((s, i) => (
-                <span key={i} className={i ? "serif accent" : ""}>
-                  {s}
-                </span>
+              {c.headline.split("\n").map((line, i) => (
+                <span key={i}>{line}</span>
               ))}
             </h1>
             <p>{c.intro}</p>
             <div className="actions">
               <Link className="button" href="/#program">
-                Temukan kelasmu <ArrowUpRight size={20} />
+                Lihat pilihan kelas <ArrowUpRight size={18} />
               </Link>
-              <Link className="text-link" href="/#tentang">
-                Kenali Shinta <ArrowUpRight size={16} />
+              <Link className="text-link" href="/konsultasi">
+                Tanya jadwal & lokasi
               </Link>
             </div>
-            <div className="hero-note">
-              <span className="mini-icon">
-                <Scissors size={19} />
-              </span>
+          </div>
+          {c.portrait ? (
+            <figure className="editorial-portrait">
+              <img src={c.portrait} alt={c.name} />
+              <figcaption>{c.name} · Pengajar kelas privat</figcaption>
+            </figure>
+          ) : (
+            <aside className="class-note">
+              <span className="eyebrow">SEBELUM MEMILIH KELAS</span>
+              <p>
+                Ingin mulai dari dasar, <br />
+                atau mendalami <br />
+                <em>teknik tertentu?</em>
+              </p>
               <span>
-                Bukan sekadar mengikuti kelas.
-                <br />
-                <strong>Ini tentang perjalanan belajarmu.</strong>
+                Kita bicarakan dulu pengalaman dan tujuan belajarmu. Tidak perlu
+                langsung menentukan program.
               </span>
+              <Link className="text-link" href="/konsultasi">
+                Konsultasi dengan Shinta <ArrowUpRight size={16} />
+              </Link>
+            </aside>
+          )}
+          <dl className="hero-facts">
+            <div>
+              <dt>Format</dt>
+              <dd>Privat 1-on-1</dd>
             </div>
-          </div>
-          <div className="hero-visual">
-            {c.portrait ? (
-              <img className="hero-photo" src={c.portrait} alt={c.name} />
-            ) : (
-              <Art />
-            )}
-            <div className="floating-tag">
-              <span>01 / PERSONAL APPROACH</span>
-              <strong>
-                Satu mentor.
-                <br />
-                Fokus untuk kamu.
-              </strong>
-              <MoveUpRight size={22} />
+            <div>
+              <dt>Materi</dt>
+              <dd>Cutting, colouring & styling</dd>
             </div>
-            <span className="vertical-label">
-              CRAFT YOUR OWN JOURNEY — SHINTA KURNIA
-            </span>
-          </div>
-          <a className="scroll-note" href="#program">
-            <ArrowDown size={14} /> SCROLL TO EXPLORE
-          </a>
+            <div>
+              <dt>Lokasi</dt>
+              <dd>Sesuai kesepakatan</dd>
+            </div>
+          </dl>
         </section>
-        <div className="value-strip">
-          <span>
-            <UserRound /> Privat 1-on-1
-          </span>
-          <span>
-            <Scissors /> Cutting · Colouring · Styling
-          </span>
-          <span>
-            <MapPin /> Lokasi sesuai kesepakatan
-          </span>
-        </div>
         <section className="section" id="program">
           <div className="section-heading">
             <div>
-              <span className="eyebrow">01 / FIND YOUR FOCUS</span>
+              <span className="eyebrow">PILIHAN KELAS</span>
               <h2>
-                Kelas yang mengikuti
+                Apa yang ingin
                 <br />
-                <em>arah belajarmu.</em>
+                kamu pelajari?
               </h2>
             </div>
             <p>
-              Dari fondasi pertama hingga eksplorasi teknik.
-              <br />
-              Pilih titik awalmu, lalu konsultasikan kebutuhanmu.
+              Baca materi, durasi, dan referensi biaya setiap program. Kita
+              konfirmasi detailnya saat konsultasi.
             </p>
           </div>
           <div className="program-grid">
@@ -112,34 +95,17 @@ export default async function Home() {
           </p>
         </section>
         <section className="about section" id="tentang">
-          <div className="about-visual">
-            {c.portrait ? (
-              <img src={c.portrait} alt={c.name} loading="lazy" />
-            ) : (
-              <div className="monogram">
-                sk
-                <span>
-                  THE PERSON BEHIND
-                  <br />
-                  YOUR LEARNING JOURNEY
-                </span>
-              </div>
-            )}
-            <span className="sticker">
-              Personal.
-              <br />
-              Practical.
-              <br />
-              Purposeful.
-            </span>
-          </div>
-          <div>
-            <span className="eyebrow">02 / MEET YOUR EDUCATOR</span>
+          <div className="educator-heading">
+            <span className="eyebrow">PENGAJAR</span>
             <h2>
-              Kenal mentormu.
+              Belajar langsung
+              <br />
+              bersama
               <br />
               <em>{c.name}.</em>
             </h2>
+          </div>
+          <div>
             <p className="body-copy">{c.bio}</p>
             <div className="about-location">
               <MapPin size={18} />
@@ -151,11 +117,11 @@ export default async function Home() {
           </div>
         </section>
         <section className="section process">
-          <span className="eyebrow">03 / A SIMPLE START</span>
+          <span className="eyebrow">CARA MENDAFTAR</span>
           <h2>
-            Langkah kecil.
+            Dari konsultasi
             <br />
-            <em>Awal yang berarti.</em>
+            ke jadwal kelas.
           </h2>
           <div className="steps">
             {[
@@ -185,12 +151,8 @@ export default async function Home() {
         </section>
         {!!c.gallery.length && (
           <section className="section" id="galeri">
-            <span className="eyebrow">LEARNING IN PRACTICE</span>
-            <h2>
-              Proses nyata.
-              <br />
-              <em>Karya yang bercerita.</em>
-            </h2>
+            <span className="eyebrow">DOKUMENTASI</span>
+            <h2>Karya & proses belajar.</h2>
             <div className="gallery">
               {c.gallery
                 .filter((g) => g.image)
@@ -205,7 +167,7 @@ export default async function Home() {
         )}
         {!!c.testimonials.length && (
           <section className="section testimonials">
-            <span className="eyebrow">STUDENT STORIES</span>
+            <span className="eyebrow">CERITA PESERTA</span>
             <h2>Cerita perjalanan mereka.</h2>
             <div className="steps">
               {c.testimonials.map((t, i) => (
@@ -219,11 +181,11 @@ export default async function Home() {
         )}
         <section className="section faq" id="faq">
           <div>
-            <span className="eyebrow">04 / GOOD TO KNOW</span>
+            <span className="eyebrow">SEBELUM MENDAFTAR</span>
             <h2>
-              Masih penasaran?
+              Yang sering
               <br />
-              <em>Kita jawab dulu.</em>
+              ditanyakan.
             </h2>
             <Link className="text-link" href="/konsultasi">
               Tanya langsung <ArrowUpRight size={17} />

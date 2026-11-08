@@ -201,3 +201,32 @@ test("brand icons, manifest and social preview are correctly sized and deployed-
   );
   assert.equal(brandMetadata({}).metadataBase?.origin, "http://localhost:3000");
 });
+
+test("editorial program presentation keeps price, duration and detail links with or without photos", async () => {
+  const { createElement } = await import("react");
+  const { renderToStaticMarkup } = await import("react-dom/server");
+  const { ProgramCard } = await import("../components/site");
+  for (const program of [
+    seed.programs[0],
+    {
+      ...seed.programs[2],
+      image: "/api/media/12345678-1234-1234-1234-123456789abc",
+    },
+  ]) {
+    const html = renderToStaticMarkup(
+      createElement(ProgramCard, { program, index: 0 }),
+    );
+    assert.ok(html.includes(`/program/${program.slug}`));
+    assert.ok(html.includes(program.title));
+    assert.ok(html.includes(program.duration));
+    assert.ok(html.includes(program.priceNote));
+    assert.ok(
+      html
+        .replace(/\u00a0/g, "")
+        .includes(
+          program.price === null ? "Konsultasikan harga" : "Rp5.000.000",
+        ),
+    );
+    assert.equal(html.includes("<img"), Boolean(program.image));
+  }
+});

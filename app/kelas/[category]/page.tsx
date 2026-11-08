@@ -26,7 +26,7 @@ export default async function Category({
   return (
     <PublicFrame>
       <main id="main" className="section catalog-page">
-        <span className="eyebrow">PRIVATE HAIR EDUCATION / 1-ON-1</span>
+        <span className="eyebrow">KELAS PRIVAT / 1-ON-1</span>
         <h1>
           Kelas
           <br />

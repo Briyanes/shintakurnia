@@ -7,7 +7,7 @@ export default async function Privacy() {
   return (
     <PublicFrame>
       <main id="main" className="section prose">
-        <span className="eyebrow">YOUR INFORMATION MATTERS</span>
+        <span className="eyebrow">PRIVASI</span>
         <h1>Pemberitahuan privasi</h1>
         <p>
           Formulir konsultasi mengumpulkan nama, nomor kontak, program yang
