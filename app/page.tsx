@@ -1,3 +1,5 @@
+import { profilePhoto, programIllustration } from "@/lib/photo-assets";
+import { ProgramPhoto } from "@/components/program-photo";
 import { ProgramGroups } from "@/components/program-groups";
 import { WhatsAppLink } from "@/components/whatsapp-link";
 import Link from "next/link";
@@ -7,11 +9,12 @@ import { CTA, PublicFrame } from "@/components/site";
 export const dynamic = "force-dynamic";
 export default async function Home() {
   const { data: c } = await readContent();
+  const heroIllustration = programIllustration("basic-cutting");
   return (
     <PublicFrame>
       <main id="main">
         <section
-          className={`editorial-hero${c.portrait ? " with-portrait" : ""}`}
+          className={`editorial-hero${c.portrait || heroIllustration ? " with-portrait" : ""}`}
         >
           <div className="hero-copy">
             <span className="eyebrow">KELAS RAMBUT PRIVAT / SHINTA KURNIA</span>
@@ -33,6 +36,10 @@ export default async function Home() {
               <img src={c.portrait} alt={c.name} />
               <figcaption>{c.name} · Pengajar kelas privat</figcaption>
             </figure>
+          ) : heroIllustration ? (
+            <div className="hero-illustration">
+              <ProgramPhoto photo={heroIllustration} priority />
+            </div>
           ) : (
             <aside className="class-note">
               <span className="eyebrow">BELAJAR SATU PER SATU</span>
@@ -86,6 +93,16 @@ export default async function Home() {
         </section>
         <section className="about section" id="tentang">
           <div className="educator-heading">
+            <figure className="educator-photo">
+              <img
+                src={c.portrait || profilePhoto}
+                alt={`Potret ${c.name}`}
+                width={406}
+                height={406}
+                loading="lazy"
+              />
+              <figcaption>{c.name} · Pengajar kelas privat</figcaption>
+            </figure>
             <span className="eyebrow">PENGAJAR</span>
             <h2>
               Kenal pengajarnya.

@@ -1,3 +1,5 @@
+import { programIllustration } from "@/lib/photo-assets";
+import { ProgramPhoto } from "@/components/program-photo";
 import { notFound } from "next/navigation";
 import Link from "next/link";
 import {
@@ -37,6 +39,7 @@ export default async function Program({
     (p) => p.slug === slug && p.status === "published",
   );
   if (!p) notFound();
+  const illustration = programIllustration(p.id);
   return (
     <PublicFrame>
       <main className="section detail-page" id="main">
@@ -62,7 +65,11 @@ export default async function Program({
             </div>
           </div>
           <aside className="booking-card">
-            {p.image && <img src={p.image} alt={p.title} />}
+            {p.image ? (
+              <img src={p.image} alt={p.title} />
+            ) : illustration ? (
+              <ProgramPhoto photo={illustration} />
+            ) : null}
             <div>
               <span className="eyebrow">BIAYA & JADWAL</span>
               <h2>

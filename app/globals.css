@@ -2507,3 +2507,94 @@ select {
     width: 165px;
   }
 }
+
+/* Photos supplied by owner: keep illustrative process photos separate from proof. */
+.illustration-photo {
+  margin: 0;
+  min-width: 0;
+}
+.illustration-photo img {
+  width: 100%;
+  height: auto;
+  aspect-ratio: 3/2;
+  object-fit: cover;
+}
+.illustration-photo figcaption {
+  display: block;
+  font-size: 11px;
+  line-height: 1.6;
+  color: var(--muted);
+  padding: 8px 0;
+}
+.hero-illustration {
+  align-self: center;
+  min-width: 0;
+}
+.hero-illustration img {
+  aspect-ratio: 4/3;
+}
+.educator-photo {
+  margin: 0 0 24px;
+  max-width: 280px;
+}
+.educator-photo img {
+  width: 100%;
+  height: auto;
+  aspect-ratio: 1;
+}
+.educator-photo figcaption {
+  color: var(--muted);
+  font-size: 11px;
+  padding-top: 9px;
+}
+.program-card > .illustration-photo {
+  grid-column: 1/-1;
+}
+.program-card > .illustration-photo + .card-body {
+  grid-column: 1/-1;
+}
+.learning-group .program-card:has(> .illustration-photo) {
+  grid-template-columns: 200px minmax(0, 1fr);
+  gap: 22px;
+}
+.learning-group .program-card > .illustration-photo {
+  grid-column: 1;
+}
+.learning-group .program-card > .illustration-photo + .card-body {
+  grid-column: 2;
+  grid-template-columns: 1fr;
+}
+.learning-group .program-card > .illustration-photo + .card-body > p {
+  grid-row: auto;
+}
+.learning-group .program-card > .illustration-photo + .card-body .card-price,
+.learning-group .program-card > .illustration-photo + .card-body .price-note {
+  grid-column: 1;
+  grid-row: auto;
+  margin-top: 12px;
+}
+.booking-card > .illustration-photo {
+  padding: 0;
+}
+.booking-card > .illustration-photo figcaption {
+  padding: 8px 20px;
+}
+@media (max-width: 1050px) {
+  .learning-group .program-card:has(> .illustration-photo) {
+    grid-template-columns: 1fr;
+  }
+  .learning-group .program-card > .illustration-photo + .card-body {
+    grid-column: 1;
+  }
+}
+@media (max-width: 700px) {
+  .hero-illustration img {
+    aspect-ratio: 3/2;
+  }
+  .educator-photo {
+    max-width: 260px;
+  }
+  .illustration-photo figcaption {
+    font-size: 11px;
+  }
+}

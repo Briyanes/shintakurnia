@@ -378,3 +378,43 @@ test("program cards never tint their background on touch hover or active state",
   assert.ok(css.includes(".program-card:focus-visible"));
   assert.ok(css.includes("@media (hover: hover) and (pointer: fine)"));
 });
+
+test("uploaded process photos are preview-only, labelled and never replace custom program images", async () => {
+  const { programIllustration, profilePhoto } =
+    await import("../lib/photo-assets");
+  const { createElement } = await import("react");
+  const { renderToStaticMarkup } = await import("react-dom/server");
+  const { ProgramCard } = await import("../components/site");
+  for (const p of seed.programs) {
+    assert.equal(programIllustration(p.id, "production"), undefined);
+    assert.ok(programIllustration(p.id, "preview"));
+  }
+  assert.equal(programIllustration("unknown", "preview"), undefined);
+  const illustration = programIllustration("basic-cutting", "preview")!;
+  const html = renderToStaticMarkup(
+    createElement(ProgramCard, {
+      program: seed.programs[0],
+      index: 0,
+      illustration,
+    }),
+  );
+  assert.ok(html.includes("Foto ilustrasi, bukan dokumentasi kelas Shinta."));
+  assert.ok(html.includes("/photos/cutting.webp"));
+  const custom = renderToStaticMarkup(
+    createElement(ProgramCard, {
+      program: { ...seed.programs[0], image: "/api/media/12345678" },
+      index: 0,
+      illustration,
+    }),
+  );
+  assert.ok(custom.includes("/api/media/12345678"));
+  assert.equal(custom.includes("/photos/cutting.webp"), false);
+  const sharp = (await import("sharp")).default;
+  for (const name of ["colouring", "cutting", "styling", "blow", "shinta"]) {
+    const m = await sharp(`public/photos/${name}.webp`).metadata();
+    assert.equal(m.format, "webp");
+    assert.ok(!m.exif);
+    assert.ok(m.width! <= 1000);
+  }
+  assert.equal(profilePhoto, "/photos/shinta.webp");
+});

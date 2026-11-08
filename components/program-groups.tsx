@@ -1,3 +1,4 @@
+import { programIllustration } from "@/lib/photo-assets";
 import type { Program } from "@/lib/schema";
 import { learningGroups } from "@/lib/catalog";
 import { ProgramCard } from "./site";
@@ -17,7 +18,12 @@ export function ProgramGroups({ programs }: { programs: Program[] }) {
           </div>
           <div className="program-grid">
             {group.programs.map((program, index) => (
-              <ProgramCard program={program} index={index} key={program.id} />
+              <ProgramCard
+                program={program}
+                index={index}
+                key={program.id}
+                illustration={programIllustration(program.id)}
+              />
             ))}
           </div>
         </section>

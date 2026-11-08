@@ -1,3 +1,5 @@
+import type { Illustration } from "@/lib/photo-assets";
+import { ProgramPhoto } from "./program-photo";
 import { Brand } from "./brand";
 import Link from "next/link";
 import { ArrowUpRight } from "lucide-react";
@@ -78,9 +80,11 @@ export function Price({ program }: { program: Program }) {
 export function ProgramCard({
   program,
   index,
+  illustration,
 }: {
   program: Program;
   index: number;
+  illustration?: Illustration;
 }) {
   return (
     <Link className="program-card" href={`/program/${program.slug}`}>
@@ -92,6 +96,8 @@ export function ProgramCard({
             loading="lazy"
           />
         </div>
+      ) : illustration ? (
+        <ProgramPhoto photo={illustration} />
       ) : (
         <span className="program-number" aria-hidden="true">
           {String(index + 1).padStart(2, "0")}
