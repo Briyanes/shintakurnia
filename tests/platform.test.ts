@@ -558,3 +558,42 @@ test("dashboard icons use fresh URLs, opaque square backgrounds and safe padding
     JSON.stringify(brandMetadata({})).includes("/brand/sk-transparent-32.png"),
   );
 });
+
+test("new dashboard programs are valid drafts and contact links normalize Indonesian numbers safely", async () => {
+  const { newProgram, whatsappContact } = await import("../lib/dashboard-ui");
+  const { programSchema } = await import("../lib/schema");
+  const p = newProgram();
+  assert.equal(p.status, "draft");
+  assert.equal(programSchema.safeParse(p).success, true);
+  assert.notEqual(newProgram().id, p.id);
+  assert.equal(
+    whatsappContact("0812-3456-7890"),
+    "https://wa.me/6281234567890",
+  );
+  assert.equal(
+    whatsappContact("+62 812 3456 7890"),
+    "https://wa.me/6281234567890",
+  );
+  assert.equal(whatsappContact("invalid"), null);
+});
+
+test("dashboard demo displays sample-only notice, mobile tabs and read-only save behavior", async () => {
+  const { createElement } = await import("react");
+  const { renderToStaticMarkup } = await import("react-dom/server");
+  const Dashboard = (await import("../components/dashboard")).default;
+  const html = renderToStaticMarkup(
+    createElement(Dashboard, { initial: seed, initialEtag: null, demo: true }),
+  );
+  assert.ok(html.includes("DEMO DESAIN"));
+  assert.ok(html.includes("Navigasi aplikasi"));
+  assert.ok(html.includes("Beranda"));
+  assert.ok(html.includes("Lainnya"));
+  assert.ok(html.includes("Belum dimuat"));
+  assert.ok(html.includes("Semua perubahan tersimpan"));
+  const Demo = (await import("../app/admin/design-demo/page")).default;
+  const previous = process.env.VERCEL_ENV;
+  process.env.VERCEL_ENV = "production";
+  assert.throws(() => Demo());
+  if (previous === undefined) delete process.env.VERCEL_ENV;
+  else process.env.VERCEL_ENV = previous;
+});

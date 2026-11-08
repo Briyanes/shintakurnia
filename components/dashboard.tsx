@@ -1,7 +1,19 @@
 "use client";
 
 import { Brand } from "./brand";
-import { useState } from "react";
+import { useState, useEffect, createContext, useContext } from "react";
+import {
+  Home,
+  BookOpen,
+  MessageSquare,
+  MoreHorizontal,
+  Eye,
+  Save,
+  ExternalLink,
+} from "lucide-react";
+import { ProgramEditor } from "./program-editor";
+import { newProgram, whatsappContact } from "@/lib/dashboard-ui";
+const DemoContext = createContext(false);
 import type { Content, Program } from "@/lib/schema";
 import { ProgramCard } from "./site";
 type Row = {
@@ -30,11 +42,11 @@ export function Login() {
   return (
     <main className="admin-setup">
       <Brand label="PRIVATE DASHBOARD" />
-      <span className="eyebrow">WELCOME BACK</span>
+      <span className="eyebrow">SELAMAT DATANG</span>
       <h1>
-        Ruang untuk
+        Kelola kelasmu.
         <br />
-        <em>mengembangkan kelasmu.</em>
+        <em>Mulai dari sini.</em>
       </h1>
       <form
         onSubmit={async (e) => {
@@ -77,7 +89,7 @@ export function Login() {
     </main>
   );
 }
-function Field({
+export function Field({
   label,
   value,
   onChange,
@@ -103,7 +115,7 @@ function Field({
     </label>
   );
 }
-function ImageField({
+export function ImageField({
   label,
   value,
   onChange,
@@ -114,6 +126,7 @@ function ImageField({
   onChange: (v: string) => void;
   onError: (v: string) => void;
 }) {
+  const demo = useContext(DemoContext);
   const [busy, setBusy] = useState(false);
   return (
     <div className="image-field">
@@ -122,7 +135,7 @@ function ImageField({
         <input
           type="file"
           accept="image/jpeg,image/png,image/webp"
-          disabled={busy}
+          disabled={busy || demo}
           onChange={async (e) => {
             const file = e.target.files?.[0];
             if (!file) return;
@@ -165,9 +178,11 @@ function ImageField({
 export default function Dashboard({
   initial,
   initialEtag,
+  demo = false,
 }: {
   initial: Content;
   initialEtag: string | null;
+  demo?: boolean;
 }) {
   const [data, setData] = useState(initial),
     [etag, setEtag] = useState(initialEtag),
@@ -178,6 +193,28 @@ export default function Dashboard({
     [rows, setRows] = useState<Row[]>([]),
     [cursor, setCursor] = useState<string | null>(null),
     [loaded, setLoaded] = useState(false);
+  useEffect(() => {
+    const warn = (event: BeforeUnloadEvent) => {
+      if (dirty) {
+        event.preventDefault();
+        event.returnValue = "";
+      }
+    };
+    window.addEventListener("beforeunload", warn);
+    return () => window.removeEventListener("beforeunload", warn);
+  }, [dirty]);
+  const [inquiryFilter, setInquiryFilter] = useState("Semua");
+  function navigate(next: string) {
+    setTab(next);
+    if (next === "Inquiry" && !loaded) void loadInquiries();
+    window.scrollTo({ top: 0, behavior: "instant" });
+  }
+  function addProgram() {
+    const added = newProgram();
+    change({ ...data, programs: [...data.programs, added] });
+    return added.id;
+  }
+
   function change(next: Content) {
     setData(next);
     setDirty(true);
@@ -192,6 +229,12 @@ export default function Dashboard({
     });
   }
   async function save() {
+    if (demo) {
+      setMessage(
+        "Demo desain: perubahan hanya di layar ini, tidak disimpan ke server.",
+      );
+      return;
+    }
     setBusy(true);
     setMessage("");
     try {
@@ -212,6 +255,12 @@ export default function Dashboard({
     }
   }
   async function loadInquiries(more = false) {
+    if (demo) {
+      setRows([]);
+      setLoaded(true);
+      setMessage("Demo desain tidak membaca data inquiry.");
+      return;
+    }
     setBusy(true);
     try {
       const result = await request(
@@ -227,6 +276,19 @@ export default function Dashboard({
       setBusy(false);
     }
   }
+  async function logout() {
+    if (dirty && !confirm("Keluar tanpa menyimpan perubahan?")) return;
+    if (demo) {
+      setMessage("Demo desain: tidak ada sesi login aktif.");
+      return;
+    }
+    try {
+      await request("/api/admin/logout", { method: "POST" });
+      location.reload();
+    } catch (e) {
+      setMessage((e as Error).message);
+    }
+  }
   const tabs = [
     "Ringkasan",
     "Program",
@@ -238,557 +300,396 @@ export default function Dashboard({
     "Preview",
   ];
   return (
-    <div className="dashboard">
-      <aside className="admin-sidebar">
-        <Brand label="YOUR CREATIVE SPACE" compact />
-        <nav aria-label="Dashboard">
-          {tabs.map((t) => (
-            <button
-              key={t}
-              className={tab === t ? "selected" : ""}
-              onClick={() => {
-                setTab(t);
-                if (t === "Inquiry" && !loaded) void loadInquiries();
-              }}
-            >
-              {t}
-            </button>
-          ))}
-        </nav>
-        <a href="/" target="_blank" rel="noopener noreferrer">
-          Buka website ↗
-        </a>
-        <button
-          className="text-button"
-          onClick={async () => {
-            if (dirty && !confirm("Keluar tanpa menyimpan perubahan?")) return;
-            try {
-              await request("/api/admin/logout", { method: "POST" });
-              location.reload();
-            } catch (e) {
-              setMessage((e as Error).message);
-            }
-          }}
-        >
-          Keluar
-        </button>
-      </aside>
-      <main className="admin-main">
-        <div className="admin-top">
-          <div>
-            <span className="eyebrow">DASHBOARD / {tab.toUpperCase()}</span>
-            <h1>{tab === "Ringkasan" ? "Halo, Shinta." : tab}</h1>
-          </div>
-          <button className="button" disabled={busy || !dirty} onClick={save}>
-            {busy
-              ? "Memproses…"
-              : dirty
-                ? "Simpan perubahan"
-                : "Semua tersimpan ✓"}
+    <DemoContext.Provider value={demo}>
+      <div className="dashboard redesigned-dashboard">
+        <aside className="admin-sidebar">
+          <Brand label="YOUR CREATIVE SPACE" compact />
+          <nav aria-label="Dashboard">
+            {tabs.map((t) => (
+              <button
+                key={t}
+                className={tab === t ? "selected" : ""}
+                aria-current={tab === t ? "page" : undefined}
+                onClick={() => {
+                  navigate(t);
+                }}
+              >
+                {t}
+              </button>
+            ))}
+          </nav>
+          <a href="/" target="_blank" rel="noopener noreferrer">
+            Buka website ↗
+          </a>
+          <button className="text-button" onClick={logout}>
+            Keluar
           </button>
-        </div>
-        <p className="muted">
-          {dirty
-            ? "Ada perubahan belum tersimpan. Periksa tab Preview sebelum menyimpan."
-            : "Kelola program dan kontenmu di satu tempat."}
-        </p>
-        {message && (
-          <p role="status" className="notice">
-            {message}
-          </p>
-        )}
-        {tab === "Ringkasan" && (
-          <>
-            <div className="stats">
-              <article>
-                <span>Program terbit</span>
-                <strong>
-                  {data.programs.filter((p) => p.status === "published").length}
-                </strong>
-              </article>
-              <article>
-                <span>Draft</span>
-                <strong>
-                  {data.programs.filter((p) => p.status === "draft").length}
-                </strong>
-              </article>
-              <article>
-                <span>Format kelas</span>
-                <strong>1:1</strong>
-              </article>
+        </aside>
+        <main className="admin-main">
+          {demo && (
+            <p className="demo-banner" role="status">
+              DEMO DESAIN · Data contoh · Tidak terhubung ke penyimpanan atau
+              akun admin.
+            </p>
+          )}
+          <div className="admin-top">
+            <div>
+              <span className="eyebrow">DASHBOARD / {tab.toUpperCase()}</span>
+              <h1>
+                {tab === "Ringkasan"
+                  ? "Halo, Shinta."
+                  : tab === "Lainnya"
+                    ? "Konten & pengaturan"
+                    : tab}
+              </h1>
             </div>
-            <section className="editor-panel">
-              <h2>Mulai dari yang paling penting.</h2>
-              <p>
-                Periksa harga hasil migrasi, ketentuan lokasi, durasi,
-                fasilitas, serta data profil sebelum peluncuran. Tambahkan foto
-                asli dan testimoni hanya dengan izin.
+            <button className="button" disabled={busy || !dirty} onClick={save}>
+              {busy
+                ? "Memproses…"
+                : dirty
+                  ? "Simpan perubahan"
+                  : "Semua tersimpan ✓"}
+            </button>
+          </div>
+          <p className="muted">
+            {dirty
+              ? "Ada perubahan belum tersimpan. Periksa tab Preview sebelum menyimpan."
+              : "Kelola program dan kontenmu di satu tempat."}
+          </p>
+          {message && (
+            <p role="status" className="notice">
+              {message}
+            </p>
+          )}
+          {tab === "Ringkasan" && (
+            <>
+              <section className="admin-welcome">
+                <span className="eyebrow">RUANG KELOLAMU</span>
+                <h2>Kelasmu, dalam genggaman.</h2>
+                <p>
+                  Perbarui program dan tanggapi calon peserta tanpa membuka
+                  komputer.
+                </p>
+                <button className="button" onClick={() => navigate("Program")}>
+                  Kelola program <BookOpen size={16} />
+                </button>
+              </section>
+              <div className="stats">
+                <article>
+                  <span>Program terbit</span>
+                  <strong>
+                    {
+                      data.programs.filter((p) => p.status === "published")
+                        .length
+                    }
+                  </strong>
+                </article>
+                <article>
+                  <span>Draft</span>
+                  <strong>
+                    {data.programs.filter((p) => p.status === "draft").length}
+                  </strong>
+                </article>
+                <article>
+                  <span>Inquiry baru</span>
+                  <strong>
+                    {loaded
+                      ? rows.filter((r) => r.status === "Baru").length
+                      : "—"}
+                  </strong>
+                  <small>
+                    {loaded
+                      ? cursor
+                        ? "Dari inquiry yang dimuat"
+                        : "Dari inquiry yang dimuat"
+                      : "Belum dimuat"}
+                  </small>
+                </article>
+              </div>
+              <section className="admin-quick-actions">
+                <button onClick={() => navigate("Program")}>
+                  <BookOpen />
+                  <strong>Program & harga</strong>
+                  <span>Tambah atau perbarui kelas</span>
+                </button>
+                <button onClick={() => navigate("Inquiry")}>
+                  <MessageSquare />
+                  <strong>Calon peserta</strong>
+                  <span>Lihat permintaan konsultasi</span>
+                </button>
+                <button onClick={() => navigate("Profil")}>
+                  <Home />
+                  <strong>Profil website</strong>
+                  <span>Atur foto dan informasi Shinta</span>
+                </button>
+              </section>
+              <p className="field-note">
+                Inquiry bukan booking terkonfirmasi. Jadwal dan biaya perlu
+                disepakati langsung.
               </p>
-              <p>
-                Perubahan disimpan dengan pemeriksaan versi. Jika sesi lain
-                mengubah konten, muat ulang agar perubahan tidak tertimpa.
-                Salinan sebelum perubahan tersimpan sebagai backup privat.
-              </p>
-              <p>
-                Inquiry bukan booking terkonfirmasi. Tinjau dan konfirmasi total
-                biaya secara langsung.
-              </p>
-              <button className="button" onClick={() => setTab("Program")}>
-                Kelola program ↗
+            </>
+          )}
+          {tab === "Program" && (
+            <ProgramEditor
+              programs={data.programs}
+              onChange={program}
+              onAdd={addProgram}
+              onError={setMessage}
+            />
+          )}
+          {tab === "Lainnya" && (
+            <section className="more-grid">
+              {["Profil", "Galeri", "Testimoni", "FAQ", "Preview"].map((t) => (
+                <button key={t} onClick={() => navigate(t)}>
+                  <strong>{t}</strong>
+                  <span>Kelola {t.toLowerCase()} →</span>
+                </button>
+              ))}
+              <a href="/" target="_blank" rel="noopener noreferrer">
+                <ExternalLink size={18} />
+                <strong>Buka website</strong>
+                <span>Lihat hasil yang sudah diterbitkan</span>
+              </a>
+              <button onClick={logout}>
+                <strong>Keluar akun</strong>
+                <span>Akhiri sesi di perangkat ini</span>
               </button>
             </section>
-          </>
-        )}
-        {tab === "Program" && (
-          <>
-            <button
-              className="button secondary"
-              onClick={() => {
-                const id = `kelas-${crypto.randomUUID().slice(0, 8)}`;
-                change({
-                  ...data,
-                  programs: [
-                    ...data.programs,
-                    {
-                      id,
-                      slug: id,
-                      title: "Program baru",
-                      category: "Cutting",
-                      level: "Pemula",
-                      description: "Tulis deskripsi program.",
-                      duration: "Dikonfirmasi",
-                      price: null,
-                      priceNote: "Harga dikonfirmasi saat konsultasi.",
-                      outcomes: ["Tulis tujuan belajar"],
-                      materials: [],
-                      facilities: "",
-                      location: "Berdasarkan kesepakatan",
-                      format: "offline",
-                      status: "draft",
-                      image: "",
-                    },
-                  ],
-                });
-              }}
-            >
-              + Tambah program
-            </button>
-            {data.programs.map((p, i) => (
-              <details className="editor-panel" key={p.id}>
-                <summary>
-                  {p.title}
-                  <span className="badge">{p.status}</span>
-                </summary>
-                <div className="editor-fields">
-                  <div className="two-col">
-                    <Field
-                      label="Nama program"
-                      value={p.title}
-                      onChange={(v) => program(i, { title: v })}
-                    />
-                    <Field
-                      label="Slug URL (huruf kecil & tanda hubung)"
-                      value={p.slug}
-                      onChange={(v) => program(i, { slug: v })}
-                    />
-                    <Field
-                      label="Kategori"
-                      value={p.category}
-                      onChange={(v) => program(i, { category: v })}
-                    />
-                    <Field
-                      label="Level"
-                      value={p.level}
-                      onChange={(v) => program(i, { level: v })}
-                    />
-                    <Field
-                      label="Durasi"
-                      value={p.duration}
-                      onChange={(v) => program(i, { duration: v })}
-                    />
-                    <label>
-                      Harga rupiah (kosong = konsultasi)
-                      <input
-                        type="number"
-                        min={0}
-                        max={1000000000}
-                        value={p.price ?? ""}
-                        onChange={(e) =>
-                          program(i, {
-                            price:
-                              e.target.value === ""
-                                ? null
-                                : Number(e.target.value),
-                          })
-                        }
-                      />
-                    </label>
-                    <label>
-                      Status
-                      <select
-                        value={p.status}
-                        onChange={(e) =>
-                          program(i, {
-                            status: e.target.value as Program["status"],
-                          })
-                        }
-                      >
-                        <option value="draft">Draft — belum tampil</option>
-                        <option value="published">Terbit</option>
-                        <option value="archived">Arsip</option>
-                      </select>
-                    </label>
-                    <label>
-                      Format
-                      <select
-                        value={p.format}
-                        onChange={(e) =>
-                          program(i, {
-                            format: e.target.value as Program["format"],
-                          })
-                        }
-                      >
-                        <option value="offline">Tatap muka</option>
-                        <option value="online">
-                          Online (aktifkan hanya jika siap)
-                        </option>
-                      </select>
-                    </label>
-                  </div>
-                  <Field
-                    label="Deskripsi"
-                    value={p.description}
-                    multiline
-                    onChange={(v) => program(i, { description: v })}
-                  />
-                  <Field
-                    label="Catatan harga"
-                    value={p.priceNote}
-                    onChange={(v) => program(i, { priceNote: v })}
-                  />
-                  <Field
-                    label="Tujuan belajar (satu per baris)"
-                    value={p.outcomes.join("\n")}
-                    multiline
-                    onChange={(v) => program(i, { outcomes: v.split("\n") })}
-                  />
-                  <Field
-                    label="Materi (satu per baris)"
-                    value={p.materials.join("\n")}
-                    multiline
+          )}
+          {tab === "Profil" && (
+            <section className="editor-panel editor-fields">
+              <Field
+                label="Nama"
+                value={data.name}
+                onChange={(v) => change({ ...data, name: v })}
+              />
+              <Field
+                label="Headline beranda (pisahkan baris dengan Enter)"
+                value={data.headline}
+                multiline
+                onChange={(v) => change({ ...data, headline: v })}
+              />
+              <Field
+                label="Pengantar beranda"
+                value={data.intro}
+                multiline
+                onChange={(v) => change({ ...data, intro: v })}
+              />
+              <Field
+                label="Biografi"
+                value={data.bio}
+                multiline
+                onChange={(v) => change({ ...data, bio: v })}
+              />
+              <Field
+                label="WhatsApp (format 628…, tanpa +)"
+                value={data.whatsapp}
+                onChange={(v) => change({ ...data, whatsapp: v })}
+              />
+              <Field
+                label="Keterangan lokasi"
+                value={data.location}
+                onChange={(v) => change({ ...data, location: v })}
+              />
+              <ImageField
+                label="Foto Shinta"
+                value={data.portrait}
+                onChange={(v) => change({ ...data, portrait: v })}
+                onError={setMessage}
+              />
+            </section>
+          )}
+          {tab === "Galeri" && (
+            <>
+              <button
+                className="button secondary"
+                onClick={() =>
+                  change({
+                    ...data,
+                    gallery: [
+                      ...data.gallery,
+                      { image: "", caption: "Proses belajar" },
+                    ],
+                  })
+                }
+              >
+                + Tambah foto
+              </button>
+              {data.gallery.map((g, i) => (
+                <section className="editor-panel editor-fields" key={i}>
+                  <ImageField
+                    label="Foto galeri"
+                    value={g.image}
+                    onError={setMessage}
                     onChange={(v) =>
-                      program(i, { materials: v ? v.split("\n") : [] })
+                      change({
+                        ...data,
+                        gallery: data.gallery.map((x, j) =>
+                          j === i ? { ...x, image: v } : x,
+                        ),
+                      })
                     }
                   />
                   <Field
-                    label="Fasilitas & ketentuan"
-                    value={p.facilities}
-                    multiline
-                    onChange={(v) => program(i, { facilities: v })}
+                    label="Deskripsi foto"
+                    value={g.caption}
+                    onChange={(v) =>
+                      change({
+                        ...data,
+                        gallery: data.gallery.map((x, j) =>
+                          j === i ? { ...x, caption: v } : x,
+                        ),
+                      })
+                    }
+                  />
+                  <button
+                    className="text-button"
+                    onClick={() =>
+                      change({
+                        ...data,
+                        gallery: data.gallery.filter((_, j) => j !== i),
+                      })
+                    }
+                  >
+                    Hapus dari galeri
+                  </button>
+                </section>
+              ))}
+            </>
+          )}
+          {tab === "Testimoni" && (
+            <>
+              <p>
+                Gunakan pernyataan asli dengan izin peserta. Jangan menambahkan
+                testimoni fiktif.
+              </p>
+              <button
+                className="button secondary"
+                onClick={() =>
+                  change({
+                    ...data,
+                    testimonials: [
+                      ...data.testimonials,
+                      { name: "Nama peserta", quote: "Tulis testimoni asli." },
+                    ],
+                  })
+                }
+              >
+                + Tambah testimoni
+              </button>
+              {data.testimonials.map((t, i) => (
+                <section className="editor-panel editor-fields" key={i}>
+                  <Field
+                    label="Nama tampilan"
+                    value={t.name}
+                    onChange={(v) =>
+                      change({
+                        ...data,
+                        testimonials: data.testimonials.map((x, j) =>
+                          j === i ? { ...x, name: v } : x,
+                        ),
+                      })
+                    }
                   />
                   <Field
-                    label="Lokasi"
-                    value={p.location}
-                    onChange={(v) => program(i, { location: v })}
+                    label="Testimoni"
+                    value={t.quote}
+                    multiline
+                    onChange={(v) =>
+                      change({
+                        ...data,
+                        testimonials: data.testimonials.map((x, j) =>
+                          j === i ? { ...x, quote: v } : x,
+                        ),
+                      })
+                    }
                   />
-                  <ImageField
-                    label="Foto program"
-                    value={p.image}
-                    onChange={(v) => program(i, { image: v })}
-                    onError={setMessage}
+                  <button
+                    className="text-button"
+                    onClick={() =>
+                      change({
+                        ...data,
+                        testimonials: data.testimonials.filter(
+                          (_, j) => j !== i,
+                        ),
+                      })
+                    }
+                  >
+                    Hapus testimoni
+                  </button>
+                </section>
+              ))}
+            </>
+          )}
+          {tab === "FAQ" && (
+            <>
+              <button
+                className="button secondary"
+                onClick={() =>
+                  change({
+                    ...data,
+                    faqs: [
+                      ...data.faqs,
+                      { question: "Pertanyaan baru", answer: "Tulis jawaban." },
+                    ],
+                  })
+                }
+              >
+                + Tambah FAQ
+              </button>
+              {data.faqs.map((f, i) => (
+                <section className="editor-panel editor-fields" key={i}>
+                  <Field
+                    label="Pertanyaan"
+                    value={f.question}
+                    onChange={(v) =>
+                      change({
+                        ...data,
+                        faqs: data.faqs.map((x, j) =>
+                          j === i ? { ...x, question: v } : x,
+                        ),
+                      })
+                    }
                   />
-                  <small>
-                    Perubahan slug pada program yang sudah diluncurkan
-                    memerlukan redirect URL lama.
-                  </small>
-                </div>
-              </details>
-            ))}
-          </>
-        )}
-        {tab === "Profil" && (
-          <section className="editor-panel editor-fields">
-            <Field
-              label="Nama"
-              value={data.name}
-              onChange={(v) => change({ ...data, name: v })}
-            />
-            <Field
-              label="Headline (baris kedua ditampilkan miring)"
-              value={data.headline}
-              multiline
-              onChange={(v) => change({ ...data, headline: v })}
-            />
-            <Field
-              label="Pengantar beranda"
-              value={data.intro}
-              multiline
-              onChange={(v) => change({ ...data, intro: v })}
-            />
-            <Field
-              label="Biografi"
-              value={data.bio}
-              multiline
-              onChange={(v) => change({ ...data, bio: v })}
-            />
-            <Field
-              label="WhatsApp (format 628…, tanpa +)"
-              value={data.whatsapp}
-              onChange={(v) => change({ ...data, whatsapp: v })}
-            />
-            <Field
-              label="Keterangan lokasi"
-              value={data.location}
-              onChange={(v) => change({ ...data, location: v })}
-            />
-            <ImageField
-              label="Foto Shinta"
-              value={data.portrait}
-              onChange={(v) => change({ ...data, portrait: v })}
-              onError={setMessage}
-            />
-          </section>
-        )}
-        {tab === "Galeri" && (
-          <>
-            <button
-              className="button secondary"
-              onClick={() =>
-                change({
-                  ...data,
-                  gallery: [
-                    ...data.gallery,
-                    { image: "", caption: "Proses belajar" },
-                  ],
-                })
-              }
-            >
-              + Tambah foto
-            </button>
-            {data.gallery.map((g, i) => (
-              <section className="editor-panel editor-fields" key={i}>
-                <ImageField
-                  label="Foto galeri"
-                  value={g.image}
-                  onError={setMessage}
-                  onChange={(v) =>
-                    change({
-                      ...data,
-                      gallery: data.gallery.map((x, j) =>
-                        j === i ? { ...x, image: v } : x,
-                      ),
-                    })
-                  }
-                />
-                <Field
-                  label="Deskripsi foto"
-                  value={g.caption}
-                  onChange={(v) =>
-                    change({
-                      ...data,
-                      gallery: data.gallery.map((x, j) =>
-                        j === i ? { ...x, caption: v } : x,
-                      ),
-                    })
-                  }
-                />
-                <button
-                  className="text-button"
-                  onClick={() =>
-                    change({
-                      ...data,
-                      gallery: data.gallery.filter((_, j) => j !== i),
-                    })
-                  }
-                >
-                  Hapus dari galeri
-                </button>
-              </section>
-            ))}
-          </>
-        )}
-        {tab === "Testimoni" && (
-          <>
-            <p>
-              Gunakan pernyataan asli dengan izin peserta. Jangan menambahkan
-              testimoni fiktif.
-            </p>
-            <button
-              className="button secondary"
-              onClick={() =>
-                change({
-                  ...data,
-                  testimonials: [
-                    ...data.testimonials,
-                    { name: "Nama peserta", quote: "Tulis testimoni asli." },
-                  ],
-                })
-              }
-            >
-              + Tambah testimoni
-            </button>
-            {data.testimonials.map((t, i) => (
-              <section className="editor-panel editor-fields" key={i}>
-                <Field
-                  label="Nama tampilan"
-                  value={t.name}
-                  onChange={(v) =>
-                    change({
-                      ...data,
-                      testimonials: data.testimonials.map((x, j) =>
-                        j === i ? { ...x, name: v } : x,
-                      ),
-                    })
-                  }
-                />
-                <Field
-                  label="Testimoni"
-                  value={t.quote}
-                  multiline
-                  onChange={(v) =>
-                    change({
-                      ...data,
-                      testimonials: data.testimonials.map((x, j) =>
-                        j === i ? { ...x, quote: v } : x,
-                      ),
-                    })
-                  }
-                />
-                <button
-                  className="text-button"
-                  onClick={() =>
-                    change({
-                      ...data,
-                      testimonials: data.testimonials.filter((_, j) => j !== i),
-                    })
-                  }
-                >
-                  Hapus testimoni
-                </button>
-              </section>
-            ))}
-          </>
-        )}
-        {tab === "FAQ" && (
-          <>
-            <button
-              className="button secondary"
-              onClick={() =>
-                change({
-                  ...data,
-                  faqs: [
-                    ...data.faqs,
-                    { question: "Pertanyaan baru", answer: "Tulis jawaban." },
-                  ],
-                })
-              }
-            >
-              + Tambah FAQ
-            </button>
-            {data.faqs.map((f, i) => (
-              <section className="editor-panel editor-fields" key={i}>
-                <Field
-                  label="Pertanyaan"
-                  value={f.question}
-                  onChange={(v) =>
-                    change({
-                      ...data,
-                      faqs: data.faqs.map((x, j) =>
-                        j === i ? { ...x, question: v } : x,
-                      ),
-                    })
-                  }
-                />
-                <Field
-                  label="Jawaban"
-                  value={f.answer}
-                  multiline
-                  onChange={(v) =>
-                    change({
-                      ...data,
-                      faqs: data.faqs.map((x, j) =>
-                        j === i ? { ...x, answer: v } : x,
-                      ),
-                    })
-                  }
-                />
-                <button
-                  className="text-button"
-                  onClick={() =>
-                    change({
-                      ...data,
-                      faqs: data.faqs.filter((_, j) => j !== i),
-                    })
-                  }
-                >
-                  Hapus FAQ
-                </button>
-              </section>
-            ))}
-          </>
-        )}
-        {tab === "Inquiry" && (
-          <>
-            <button
-              className="button secondary"
-              disabled={busy}
-              onClick={() => loadInquiries()}
-            >
-              Muat ulang
-            </button>
-            {loaded && !rows.length && (
-              <p>
-                Belum ada inquiry. Permintaan baru akan muncul setelah formulir
-                berhasil dikirim.
-              </p>
-            )}
-            {rows.map((r) => (
-              <article className="editor-panel" key={r.id}>
-                <span className="eyebrow">
-                  {new Date(r.createdAt).toLocaleString("id-ID")}
-                </span>
-                <h2>{r.name}</h2>
-                <p>
-                  {r.programTitle} · {r.city} ·{" "}
-                  {r.date || "Waktu belum ditentukan"}
-                </p>
-                <p>
-                  {r.phone} · {r.experience}
-                </p>
-                <p>{r.goal}</p>
-                <small>
-                  Referensi harga saat inquiry:{" "}
-                  {r.quotedPrice === null
-                    ? "Konsultasi"
-                    : `Rp${r.quotedPrice.toLocaleString("id-ID")}`}{" "}
-                  — bukan konfirmasi pembayaran.
-                </small>
+                  <Field
+                    label="Jawaban"
+                    value={f.answer}
+                    multiline
+                    onChange={(v) =>
+                      change({
+                        ...data,
+                        faqs: data.faqs.map((x, j) =>
+                          j === i ? { ...x, answer: v } : x,
+                        ),
+                      })
+                    }
+                  />
+                  <button
+                    className="text-button"
+                    onClick={() =>
+                      change({
+                        ...data,
+                        faqs: data.faqs.filter((_, j) => j !== i),
+                      })
+                    }
+                  >
+                    Hapus FAQ
+                  </button>
+                </section>
+              ))}
+            </>
+          )}
+          {tab === "Inquiry" && (
+            <>
+              <div className="inquiry-toolbar">
                 <label>
-                  Status
+                  Filter status
                   <select
-                    value={r.status}
-                    disabled={busy}
-                    onChange={async (e) => {
-                      setBusy(true);
-                      try {
-                        await request("/api/admin/inquiries", {
-                          method: "PATCH",
-                          headers: { "Content-Type": "application/json" },
-                          body: JSON.stringify({
-                            id: r.id,
-                            etag: r.etag,
-                            status: e.target.value,
-                          }),
-                        });
-                        await loadInquiries();
-                      } catch (e) {
-                        setMessage((e as Error).message);
-                      } finally {
-                        setBusy(false);
-                      }
-                    }}
+                    value={inquiryFilter}
+                    onChange={(e) => setInquiryFilter(e.target.value)}
                   >
                     {[
+                      "Semua",
                       "Baru",
                       "Dihubungi",
                       "Konsultasi",
@@ -800,43 +701,187 @@ export default function Dashboard({
                     ))}
                   </select>
                 </label>
-              </article>
-            ))}
-            {cursor && (
+                <p>
+                  Status diperbarui langsung. Data harga saat inquiry tetap
+                  dipertahankan.
+                </p>
+              </div>
               <button
                 className="button secondary"
                 disabled={busy}
-                onClick={() => loadInquiries(true)}
+                onClick={() => loadInquiries()}
               >
-                Muat berikutnya
+                Muat ulang
               </button>
-            )}
-          </>
-        )}
-        {tab === "Preview" && (
-          <section className="editor-panel">
-            <p className="notice">
-              Pratinjau konten lokal, belum disimpan. Kartu draft juga
-              ditampilkan di sini; tautan detail hanya tersedia setelah program
-              diterbitkan.
-            </p>
-            <h2>{data.headline}</h2>
-            <p>{data.intro}</p>
-            <h3>{data.name}</h3>
-            <p>{data.bio}</p>
-            <div className="program-grid">
-              {data.programs
-                .filter((p) => p.status !== "archived")
-                .map((p, i) => (
-                  <div key={p.id}>
-                    <span className="badge">{p.status}</span>
-                    <ProgramCard program={p} index={i} />
-                  </div>
+              {loaded && !rows.length && (
+                <p>
+                  Belum ada inquiry. Permintaan baru akan muncul setelah
+                  formulir berhasil dikirim.
+                </p>
+              )}
+              {rows
+                .filter(
+                  (r) =>
+                    inquiryFilter === "Semua" || r.status === inquiryFilter,
+                )
+                .map((r) => (
+                  <article className="editor-panel inquiry-card" key={r.id}>
+                    <span className="state-tag">{r.status}</span>
+                    <span className="eyebrow">
+                      {new Date(r.createdAt).toLocaleString("id-ID")}
+                    </span>
+                    <h2>{r.name}</h2>
+                    <p>
+                      {r.programTitle} · {r.city} ·{" "}
+                      {r.date || "Waktu belum ditentukan"}
+                    </p>
+                    <p>
+                      {r.phone} · {r.experience}
+                    </p>
+                    <p>{r.goal}</p>
+                    <small>
+                      Referensi harga saat inquiry:{" "}
+                      {r.quotedPrice === null
+                        ? "Konsultasi"
+                        : `Rp${r.quotedPrice.toLocaleString("id-ID")}`}{" "}
+                      — bukan konfirmasi pembayaran.
+                    </small>
+                    {whatsappContact(r.phone) && (
+                      <a
+                        className="button secondary"
+                        href={whatsappContact(r.phone)!}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                      >
+                        Hubungi WhatsApp <ExternalLink size={16} />
+                      </a>
+                    )}
+                    <label>
+                      Status
+                      <select
+                        value={r.status}
+                        disabled={busy}
+                        onChange={async (e) => {
+                          setBusy(true);
+                          try {
+                            await request("/api/admin/inquiries", {
+                              method: "PATCH",
+                              headers: { "Content-Type": "application/json" },
+                              body: JSON.stringify({
+                                id: r.id,
+                                etag: r.etag,
+                                status: e.target.value,
+                              }),
+                            });
+                            await loadInquiries();
+                          } catch (e) {
+                            setMessage((e as Error).message);
+                          } finally {
+                            setBusy(false);
+                          }
+                        }}
+                      >
+                        {[
+                          "Baru",
+                          "Dihubungi",
+                          "Konsultasi",
+                          "Terkonfirmasi",
+                          "Selesai",
+                          "Batal",
+                        ].map((s) => (
+                          <option key={s}>{s}</option>
+                        ))}
+                      </select>
+                    </label>
+                  </article>
                 ))}
-            </div>
-          </section>
-        )}
-      </main>
-    </div>
+              {loaded &&
+                rows.length > 0 &&
+                !rows.some(
+                  (r) =>
+                    inquiryFilter === "Semua" || r.status === inquiryFilter,
+                ) && (
+                  <p className="admin-empty">
+                    Tidak ada inquiry dengan status ini pada data yang dimuat.
+                  </p>
+                )}
+              {cursor && (
+                <button
+                  className="button secondary"
+                  disabled={busy}
+                  onClick={() => loadInquiries(true)}
+                >
+                  Muat berikutnya
+                </button>
+              )}
+            </>
+          )}
+          {tab === "Preview" && (
+            <section className="editor-panel">
+              <p className="notice">
+                Pratinjau konten lokal, belum disimpan. Kartu draft juga
+                ditampilkan di sini; tautan detail hanya tersedia setelah
+                program diterbitkan.
+              </p>
+              <h2>{data.headline}</h2>
+              <p>{data.intro}</p>
+              <h3>{data.name}</h3>
+              <p>{data.bio}</p>
+              <div className="program-grid">
+                {data.programs
+                  .filter((p) => p.status !== "archived")
+                  .map((p, i) => (
+                    <div key={p.id}>
+                      <span className="badge">{p.status}</span>
+                      <ProgramCard program={p} index={i} />
+                    </div>
+                  ))}
+              </div>
+            </section>
+          )}
+        </main>
+        <div className="admin-savebar">
+          <span>
+            {dirty ? "Perubahan belum disimpan" : "Semua perubahan tersimpan"}
+            {demo ? " · Demo" : ""}
+          </span>
+          <div>
+            <button
+              className="button secondary"
+              onClick={() => navigate("Preview")}
+            >
+              <Eye size={16} /> Preview
+            </button>
+            <button className="button" disabled={busy || !dirty} onClick={save}>
+              <Save size={16} />
+              {busy ? "Memproses…" : "Simpan perubahan"}
+            </button>
+          </div>
+        </div>
+        <nav className="admin-bottom-nav" aria-label="Navigasi aplikasi">
+          {[
+            { tab: "Ringkasan", label: "Beranda", icon: Home },
+            { tab: "Program", label: "Program", icon: BookOpen },
+            { tab: "Inquiry", label: "Inquiry", icon: MessageSquare },
+            { tab: "Lainnya", label: "Lainnya", icon: MoreHorizontal },
+          ].map((item) => (
+            <button
+              key={item.tab}
+              aria-current={
+                tab === item.tab ||
+                (item.tab === "Lainnya" &&
+                  !["Ringkasan", "Program", "Inquiry"].includes(tab))
+                  ? "page"
+                  : undefined
+              }
+              onClick={() => navigate(item.tab)}
+            >
+              <item.icon size={20} />
+              <span>{item.label}</span>
+            </button>
+          ))}
+        </nav>
+      </div>
+    </DemoContext.Provider>
   );
 }
