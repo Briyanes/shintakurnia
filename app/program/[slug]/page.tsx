@@ -65,11 +65,6 @@ export default async function Program({
             </div>
           </div>
           <aside className="booking-card">
-            {p.image ? (
-              <img src={p.image} alt={p.title} />
-            ) : illustration ? (
-              <ProgramPhoto photo={illustration} />
-            ) : null}
             <div>
               <span className="eyebrow">BIAYA & JADWAL</span>
               <h2>
@@ -84,6 +79,11 @@ export default async function Program({
                 total biaya disepakati terlebih dahulu.
               </small>
             </div>
+            {p.image ? (
+              <img src={p.image} alt={p.title} />
+            ) : illustration ? (
+              <ProgramPhoto photo={illustration} />
+            ) : null}
           </aside>
           <div className="detail-curriculum">
             <h2>Fokus belajarmu</h2>
