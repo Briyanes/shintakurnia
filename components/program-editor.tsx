@@ -1,5 +1,5 @@
 "use client";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import type { Program } from "@/lib/schema";
 import { statusLabels } from "@/lib/dashboard-ui";
 import { Field, ImageField } from "./dashboard";
@@ -19,6 +19,12 @@ export function ProgramEditor({
     [step, setStep] = useState("Info kelas"),
     [search, setSearch] = useState(""),
     [filter, setFilter] = useState("all");
+  useEffect(() => {
+    if (selected)
+      document
+        .querySelector(".program-edit")
+        ?.scrollIntoView({ block: "start", behavior: "instant" });
+  }, [selected]);
   const index = programs.findIndex((p) => p.id === selected),
     p = programs[index];
   if (!p)

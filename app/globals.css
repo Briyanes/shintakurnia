@@ -3198,3 +3198,12 @@ select {
     background: #eeeee8;
   }
 }
+.redesigned-dashboard .admin-sidebar {
+  overflow-y: auto;
+}
+.redesigned-dashboard input,
+.redesigned-dashboard textarea,
+.redesigned-dashboard select,
+.admin-program-row {
+  scroll-margin-bottom: 190px;
+}
