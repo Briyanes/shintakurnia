@@ -27,14 +27,9 @@ const illustrations: Record<string, Illustration> = {
     caption,
   },
 };
-// Licensing of uploaded process photographs is pending. Never enable on production
-// without a separate rights review. This gate applies to rendered illustration use.
-export function programIllustration(
-  id: string,
-  environment = process.env.VERCEL_ENV,
-): Illustration | undefined {
-  return environment === "preview" || environment === "development"
-    ? illustrations[id]
-    : undefined;
+// Owner requested public display of these uploads. Keep illustration captions;
+// publication approval is not confirmation of copyright or model-release rights.
+export function programIllustration(id: string): Illustration | undefined {
+  return Object.hasOwn(illustrations, id) ? illustrations[id] : undefined;
 }
 export const profilePhoto = "/photos/shinta.webp";

@@ -379,18 +379,18 @@ test("program cards never tint their background on touch hover or active state",
   assert.ok(css.includes("@media (hover: hover) and (pointer: fine)"));
 });
 
-test("uploaded process photos are preview-only, labelled and never replace custom program images", async () => {
+test("uploaded process photos are available publicly, labelled and never replace custom program images", async () => {
   const { programIllustration, profilePhoto } =
     await import("../lib/photo-assets");
   const { createElement } = await import("react");
   const { renderToStaticMarkup } = await import("react-dom/server");
   const { ProgramCard } = await import("../components/site");
   for (const p of seed.programs) {
-    assert.equal(programIllustration(p.id, "production"), undefined);
-    assert.ok(programIllustration(p.id, "preview"));
+    assert.ok(programIllustration(p.id));
   }
-  assert.equal(programIllustration("unknown", "preview"), undefined);
-  const illustration = programIllustration("basic-cutting", "preview")!;
+  assert.equal(programIllustration("unknown"), undefined);
+  assert.equal(programIllustration("toString"), undefined);
+  const illustration = programIllustration("basic-cutting")!;
   const html = renderToStaticMarkup(
     createElement(ProgramCard, {
       program: seed.programs[0],
