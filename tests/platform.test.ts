@@ -418,3 +418,107 @@ test("uploaded process photos are available publicly, labelled and never replace
   }
   assert.equal(profilePhoto, "/photos/shinta.webp");
 });
+
+test("dashboard has a separate standalone manifest and preserves public browser manifest", async () => {
+  const { GET } = await import("../app/admin/app.webmanifest/route");
+  const manifest = await (await GET()).json();
+  assert.equal(manifest.start_url, "/admin");
+  assert.equal(manifest.scope, "/admin");
+  assert.equal(manifest.id, "/admin");
+  assert.equal(manifest.display, "standalone");
+  assert.equal(manifest.icons.length, 2);
+  const publicManifest = (await import("../app/manifest")).default();
+  assert.equal(publicManifest.display, "browser");
+});
+
+test("dashboard worker caches only generic offline content and does not intercept API or writes", async () => {
+  const { readFile } = await import("node:fs/promises");
+  const { runInNewContext } = await import("node:vm");
+  const script = await readFile("public/admin/sw.js", "utf8");
+  const handlers: Record<string, (event: any) => void> = {};
+  const added: string[] = [];
+  const deleted: string[] = [];
+  let intercepted = false;
+  const context = {
+    self: {
+      location: { origin: "https://example.test" },
+      addEventListener: (name: string, handler: (event: any) => void) => {
+        handlers[name] = handler;
+      },
+      skipWaiting: async () => {},
+      clients: { claim: async () => {} },
+    },
+    URL,
+    Response,
+    fetch: async () => {
+      throw new Error("offline");
+    },
+    caches: {
+      open: async () => ({
+        add: async (url: string) => {
+          added.push(url);
+        },
+      }),
+      keys: async () => [
+        "other-app-cache",
+        "shinta-admin-offline-v0",
+        "shinta-admin-offline-v1",
+      ],
+      delete: async (key: string) => {
+        deleted.push(key);
+      },
+      match: async () => new Response("generic offline"),
+    },
+  };
+  runInNewContext(script, context);
+  let work: Promise<unknown> | undefined;
+  handlers.install({
+    waitUntil: (p: Promise<unknown>) => {
+      work = p;
+    },
+  });
+  await work;
+  assert.deepEqual(added, ["/admin/offline.html"]);
+  handlers.activate({
+    waitUntil: (p: Promise<unknown>) => {
+      work = p;
+    },
+  });
+  await work;
+  assert.deepEqual(deleted, ["shinta-admin-offline-v0"]);
+  for (const request of [
+    {
+      url: "https://example.test/api/admin/content",
+      method: "PUT",
+      mode: "cors",
+    },
+    {
+      url: "https://example.test/api/admin/content",
+      method: "GET",
+      mode: "cors",
+    },
+    { url: "https://example.test/admin", method: "POST", mode: "navigate" },
+    { url: "https://example.test/", method: "GET", mode: "navigate" },
+  ]) {
+    intercepted = false;
+    handlers.fetch({
+      request,
+      respondWith: () => {
+        intercepted = true;
+      },
+    });
+    assert.equal(intercepted, false);
+  }
+  let response: Promise<Response> | undefined;
+  handlers.fetch({
+    request: {
+      url: "https://example.test/admin",
+      method: "GET",
+      mode: "navigate",
+    },
+    respondWith: (p: Promise<Response>) => {
+      response = p;
+    },
+  });
+  assert.equal(await (await response!).text(), "generic offline");
+});

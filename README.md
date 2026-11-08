@@ -32,3 +32,7 @@ Content saves use ETag preconditions and pre-change backup. On conflict reload b
 - Review preview and approve production/custom domain separately.
 
 See [migration checklist](docs/MIGRATION.md). Store, hosting and DNS have not been modified by this code.
+
+## Dashboard on your phone
+
+Open `/admin` and follow “Cara memasang” / the real browser-provided install button. It starts at the dashboard in a standalone window, not the marketing homepage. Installation never bypasses login. Internet is required to edit/save; the offline page contains no private data. See [PWA security and phone acceptance checks](docs/DASHBOARD-PWA.md).
