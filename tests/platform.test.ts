@@ -127,3 +127,37 @@ test("protected APIs deny anonymous access and reject cross-origin writes", asyn
     503,
   );
 });
+
+test("legacy booking and category URLs resolve to relevant existing destinations", async () => {
+  const { legacyRedirects, findCategory } = await import("../lib/catalog");
+  const destinations = Object.fromEntries(
+    legacyRedirects.map((item) => [item.source, item.destination]),
+  );
+  assert.equal(destinations["/form-booking"], "/konsultasi");
+  assert.equal(destinations["/kursus-tata-rambut"], "/kelas");
+  assert.equal(destinations["/galery-treatments-service"], "/galeri");
+  for (const redirect of legacyRedirects) {
+    assert.equal(redirect.permanent, true);
+    assert.equal(redirect.destination.includes("#"), false);
+    if (redirect.destination.startsWith("/kelas/"))
+      assert.ok(findCategory(redirect.destination.split("/").pop()!));
+  }
+});
+
+test("category catalogs show only published matching programs and support empty categories", async () => {
+  const { publishedPrograms } = await import("../lib/catalog");
+  assert.deepEqual(
+    publishedPrograms(seed.programs, "cutting").map((p) => p.id),
+    ["basic-cutting", "intermediate-haircut"],
+  );
+  assert.deepEqual(
+    publishedPrograms(seed.programs, "blow-styling").map((p) => p.id),
+    ["basic-blow", "styling-iron"],
+  );
+  assert.deepEqual(publishedPrograms(seed.programs, "unknown"), []);
+  const programs = structuredClone(seed.programs);
+  programs[0].status = "draft";
+  programs[1].status = "archived";
+  assert.deepEqual(publishedPrograms(programs, "cutting"), []);
+  assert.equal(publishedPrograms(programs).length, 3);
+});

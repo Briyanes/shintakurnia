@@ -21,7 +21,7 @@ These are historical references, not confirmed current offers. Owner must valida
 - Validate name/photo/testimonial permissions, privacy notice and data retention policy.
 - Configure admin password hash, validate login + CRUD + upload + inquiry status on preview. Current browser verification cannot cover authenticated features without owner configuration.
 - Verify at 375, 768 and 1280 widths, keyboard navigation, detail/form/error/empty states; measure performance after real images.
-- Review redirect map. Current known category URLs redirect to program section; refine after complete URL export. Do not claim SEO migration complete.
+- Review redirect map. Known class/category, booking and gallery URLs resolve to relevant dedicated pages; refine after complete URL export. Do not claim SEO migration complete.
 - Review costs and rate limits. Small-scale JSON content uses private Blob with optimistic concurrency and immutable pre-change backups. Inquiry files are separate; snapshots keep original price. Not a relational database or financial ledger.
 
 ## Deployment sequence
@@ -35,3 +35,7 @@ Content lives under app/{production|preview|development}/content.json in one pri
 Before launch implement and exercise an owner-approved retention/deletion procedure for inquiries and rate-limit records. Current admin cannot delete inquiries. Use secure storage administration to honor deletion requests; never expose customer data in chat or repository.
 
 Rollback: keep old hosting intact during launch. Restore DNS to recorded old values if needed. For content rollback, recover a private backup into content.json only after exporting current data; a redeploy alone does not revert stored data.
+
+## Follow-up public audit
+
+Known booking URL `/form-booking/` now redirects to `/konsultasi`; class index and category URLs resolve to dedicated catalog pages rather than an unrelated homepage fragment. Gallery URL resolves to `/galeri`, even when no photographs are published. The empty state says documentation is being prepared and never substitutes illustrations for claimed real work. See [partial legacy inventory](LEGACY-INVENTORY.md) for source limitations and blocked booking-parity checks. Category membership follows the existing CMS category names (`Cutting`, `Colouring`, `Styling` / `Blow & Styling`); custom categories remain on the all-programs page.

@@ -33,7 +33,8 @@ export function Footer() {
         <p>Ruang untuk belajar, bertumbuh, dan berkarya.</p>
       </div>
       <div className="footer-links">
-        <Link href="/#program">Program kelas</Link>
+        <Link href="/kelas">Program kelas</Link>
+        <Link href="/galeri">Galeri</Link>
         <Link href="/konsultasi">Konsultasi</Link>
         <Link href="/privasi">Privasi</Link>
         <Link href="/admin">Dashboard</Link>

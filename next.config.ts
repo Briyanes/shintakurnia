@@ -1,29 +1,9 @@
 import type { NextConfig } from "next";
+import { legacyRedirects } from "./lib/catalog";
 const config: NextConfig = {
   poweredByHeader: false,
   async redirects() {
-    return [
-      {
-        source: "/kursus-tata-rambut",
-        destination: "/#program",
-        permanent: true,
-      },
-      {
-        source: "/kursus-tata-rambut/cutting",
-        destination: "/#program",
-        permanent: true,
-      },
-      {
-        source: "/kursus-tata-rambut/blow-styling",
-        destination: "/#program",
-        permanent: true,
-      },
-      {
-        source: "/galery-treatments-service",
-        destination: "/#galeri",
-        permanent: true,
-      },
-    ];
+    return legacyRedirects;
   },
   async headers() {
     return [
