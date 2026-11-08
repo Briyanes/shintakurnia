@@ -1519,3 +1519,22 @@ textarea {
     animation: none !important;
   }
 }
+
+/* Keep calls to action readable on narrow phones without squeezing labels. */
+.button {
+  white-space: nowrap;
+}
+.actions {
+  flex-wrap: wrap;
+}
+@media (max-width: 360px) {
+  .header .brand {
+    font-size: 22px;
+  }
+  .header nav a:last-child {
+    display: none;
+  }
+  .hero .actions {
+    gap: 12px 20px;
+  }
+}
