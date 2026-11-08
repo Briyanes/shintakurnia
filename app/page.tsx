@@ -37,8 +37,7 @@ export default async function Home() {
             <aside className="class-note">
               <span className="eyebrow">BELAJAR SATU PER SATU</span>
               <p>
-                Fokus ke teknik
-                <br />
+                Fokus ke teknik <br />
                 yang ingin kamu pelajari.
               </p>
               <span>
