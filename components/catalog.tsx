@@ -1,7 +1,7 @@
 import Link from "next/link";
 import { categories, publishedPrograms } from "@/lib/catalog";
 import type { Program } from "@/lib/schema";
-import { ProgramCard } from "./site";
+import { ProgramGroups } from "./program-groups";
 
 export function Catalog({
   programs,
@@ -28,11 +28,7 @@ export function Catalog({
         ))}
       </nav>
       {visible.length ? (
-        <div className="program-grid">
-          {visible.map((program, index) => (
-            <ProgramCard key={program.id} program={program} index={index} />
-          ))}
-        </div>
+        <ProgramGroups programs={visible} />
       ) : (
         <div className="info-box">
           <h2>Belum ada program yang tersedia.</h2>

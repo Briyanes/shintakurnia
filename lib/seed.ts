@@ -11,7 +11,7 @@ const common = {
 };
 export const seed: Content = {
   name: "Shinta Kurnia",
-  headline: "Belajar rambut\nlangsung bersama Shinta.",
+  headline: "Belajar rambut,\nbareng Shinta.",
   intro:
     "Kelas privat 1-on-1 untuk mempelajari cutting, colouring, dan styling. Mulai dari pengalamanmu sekarang; program, waktu, dan lokasi kita bicarakan bersama.",
   bio: "Shinta Kurnia adalah penata rambut dengan pendekatan pembelajaran yang mudah dan santai, serta mengikuti perkembangan tren. Jelajahi program cutting, colouring, dan styling; konsultasikan level serta tujuan belajarmu sebelum menentukan kelas.",

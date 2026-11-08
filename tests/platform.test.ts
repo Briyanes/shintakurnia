@@ -230,3 +230,95 @@ test("editorial program presentation keeps price, duration and detail links with
     assert.equal(html.includes("<img"), Boolean(program.image));
   }
 });
+
+test("learning groups use only published CMS levels, with no guessed audience for custom levels", async () => {
+  const { learningGroups } = await import("../lib/catalog");
+  const groups = learningGroups(seed.programs);
+  assert.deepEqual(
+    groups.map((g) => [g.id, g.programs.map((p) => p.id)]),
+    [
+      ["dasar", ["basic-cutting", "basic-blow", "styling-iron"]],
+      ["pendalaman", ["intermediate-haircut"]],
+      ["konsultasi", ["colouring"]],
+    ],
+  );
+  const custom = {
+    ...seed.programs[0],
+    id: "custom",
+    slug: "custom",
+    level: "Khusus tim",
+  };
+  assert.equal(learningGroups([custom])[0].id, "konsultasi");
+  assert.equal(learningGroups([{ ...custom, status: "draft" }]).length, 0);
+});
+
+test("mobile menu keeps all navigation links and WhatsApp link uses line icon without unsafe window opener", async () => {
+  const { createElement } = await import("react");
+  const { renderToStaticMarkup } = await import("react-dom/server");
+  const { Header } = await import("../components/site");
+  const { WhatsAppLink } = await import("../components/whatsapp-link");
+  const menu = renderToStaticMarkup(createElement(Header));
+  assert.ok(menu.includes('<details class="mobile-menu"'));
+  assert.ok(menu.includes("<summary>Menu"));
+  for (const path of ["/kelas", "/#tentang", "/galeri", "/#faq", "/konsultasi"])
+    assert.ok(menu.includes(`href="${path}"`));
+  const wa = renderToStaticMarkup(
+    createElement(WhatsAppLink, {
+      phone: "620000000000",
+      message: "Kelas & lokasi?",
+    }),
+  );
+  assert.ok(
+    wa.includes("https://wa.me/620000000000?text=Kelas%20%26%20lokasi%3F"),
+  );
+  assert.ok(wa.includes('rel="noopener noreferrer"'));
+  assert.ok(wa.includes("<svg"));
+  assert.equal(wa.includes("↗"), false);
+});
+
+test("neutral logo preserves main artwork and removes only the separate tagline area", async () => {
+  const sharp = (await import("sharp")).default;
+  const original = await sharp("public/brand/shinta-kurnia-wordmark.png")
+    .ensureAlpha()
+    .raw()
+    .toBuffer({ resolveWithObject: true });
+  const neutral = await sharp("public/brand/shinta-kurnia-neutral.png")
+    .ensureAlpha()
+    .raw()
+    .toBuffer({ resolveWithObject: true });
+  assert.equal(neutral.info.width, original.info.width);
+  assert.equal(neutral.info.height, original.info.height);
+  let removed = 0;
+  for (let y = 0; y < original.info.height; y++)
+    for (let x = 0; x < original.info.width; x++) {
+      const i = (y * original.info.width + x) * 4;
+      if (y >= 195 && x >= 300) {
+        assert.equal(neutral.data[i + 3], 0);
+        if (original.data[i + 3]) removed++;
+      } else
+        assert.deepEqual(
+          neutral.data.subarray(i, i + 4),
+          original.data.subarray(i, i + 4),
+        );
+    }
+  assert.ok(removed > 0);
+});
+
+test("primary text, muted text and button foreground colors meet normal-text AA contrast", () => {
+  const lum = (hex: string) => {
+    const c = hex
+      .match(/\w\w/g)!
+      .map((n) => parseInt(n, 16) / 255)
+      .map((v) => (v <= 0.04045 ? v / 12.92 : ((v + 0.055) / 1.055) ** 2.4));
+    return c[0] * 0.2126 + c[1] * 0.7152 + c[2] * 0.0722;
+  };
+  for (const [a, b] of [
+    ["252725", "f6f5f0"],
+    ["5d625c", "f6f5f0"],
+    ["ffffff", "252725"],
+    ["ffffff", "3d6558"],
+  ]) {
+    const values = [lum(a), lum(b)].sort((a, b) => b - a);
+    assert.ok((values[0] + 0.05) / (values[1] + 0.05) >= 4.5);
+  }
+});

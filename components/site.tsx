@@ -10,14 +10,27 @@ export function Header() {
       </a>
       <header className="header">
         <Brand />
-        <nav aria-label="Navigasi utama">
-          <Link href="/#program">Program</Link>
-          <Link href="/#tentang">Tentang</Link>
+        <nav className="desktop-nav" aria-label="Navigasi utama">
+          <Link href="/kelas">Kelas</Link>
+          <Link href="/#tentang">Tentang Shinta</Link>
+          <Link href="/galeri">Galeri</Link>
           <Link href="/#faq">FAQ</Link>
         </nav>
-        <Link className="button small" href="/konsultasi">
-          Konsultasi <ArrowUpRight size={16} />
+        <Link className="button small header-consult" href="/konsultasi">
+          Konsultasi <ArrowUpRight size={16} aria-hidden="true" />
         </Link>
+        <details className="mobile-menu">
+          <summary>
+            Menu <span aria-hidden="true">+</span>
+          </summary>
+          <nav aria-label="Navigasi ponsel">
+            <Link href="/kelas">Pilihan kelas</Link>
+            <Link href="/#tentang">Tentang Shinta</Link>
+            <Link href="/galeri">Galeri</Link>
+            <Link href="/#faq">Pertanyaan umum</Link>
+            <Link href="/konsultasi">Konsultasi kelas</Link>
+          </nav>
+        </details>
       </header>
     </>
   );

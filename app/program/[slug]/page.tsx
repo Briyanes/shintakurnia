@@ -9,7 +9,7 @@ import {
   UserRound,
 } from "lucide-react";
 import { readContent } from "@/lib/store";
-import { PublicFrame, Price, ProgramSummary } from "@/components/site";
+import { PublicFrame, Price } from "@/components/site";
 export const dynamic = "force-dynamic";
 export async function generateMetadata({
   params,
@@ -40,11 +40,11 @@ export default async function Program({
   return (
     <PublicFrame>
       <main className="section detail-page" id="main">
-        <Link className="text-link" href="/#program">
+        <Link className="text-link" href="/kelas">
           <ArrowLeft size={16} /> Semua program
         </Link>
         <div className="detail-grid">
-          <div>
+          <div className="detail-intro">
             <span className="eyebrow">
               {p.category} / {p.level}
             </span>
@@ -60,6 +60,25 @@ export default async function Program({
               </span>
               <span>{p.format === "offline" ? "Tatap muka" : "Online"}</span>
             </div>
+          </div>
+          <aside className="booking-card">
+            {p.image && <img src={p.image} alt={p.title} />}
+            <div>
+              <span className="eyebrow">BIAYA & JADWAL</span>
+              <h2>
+                <Price program={p} />
+              </h2>
+              <p>{p.priceNote}</p>
+              <Link className="button" href={`/konsultasi?program=${p.id}`}>
+                Konsultasi & cek jadwal <ArrowUpRight size={18} />
+              </Link>
+              <small>
+                Permintaan konsultasi bukan konfirmasi pendaftaran. Jadwal dan
+                total biaya disepakati terlebih dahulu.
+              </small>
+            </div>
+          </aside>
+          <div className="detail-curriculum">
             <h2>Fokus belajarmu</h2>
             <ul className="check-list">
               {p.outcomes.map((v, i) => (
@@ -84,23 +103,6 @@ export default async function Program({
             </p>
             <p className="body-copy">{p.facilities}</p>
           </div>
-          <aside className="booking-card">
-            {p.image ? <img src={p.image} alt={p.title} /> : <ProgramSummary />}
-            <div>
-              <span className="eyebrow">INVESTASI BELAJAR</span>
-              <h2>
-                <Price program={p} />
-              </h2>
-              <p>{p.priceNote}</p>
-              <Link className="button" href={`/konsultasi?program=${p.id}`}>
-                Konsultasi & cek jadwal <ArrowUpRight size={18} />
-              </Link>
-              <small>
-                Permintaan konsultasi bukan konfirmasi pendaftaran. Jadwal dan
-                total biaya disepakati terlebih dahulu.
-              </small>
-            </div>
-          </aside>
         </div>
       </main>
     </PublicFrame>

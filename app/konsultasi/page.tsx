@@ -1,3 +1,4 @@
+import { WhatsAppLink } from "@/components/whatsapp-link";
 import { readContent } from "@/lib/store";
 import { PublicFrame } from "@/components/site";
 import InquiryForm from "@/components/inquiry-form";
@@ -16,30 +17,12 @@ export default async function Consult({
       <main className="section consult-page" id="main">
         <div>
           <span className="eyebrow">KONSULTASI KELAS</span>
-          <h1>
-            Belajar apa
-            <br />
-            <em>berikutnya?</em>
-          </h1>
+          <h1>Konsultasi kelas.</h1>
           <p className="lead">
-            Ceritakan tujuan belajarmu. Program, lokasi, dan jadwal kita
+            Ceritakan teknik yang ingin kamu pelajari. Jadwal dan lokasi kita
             bicarakan bersama.
           </p>
-          <div className="info-box">
-            <strong>Privat 1-on-1 · Lokasi fleksibel</strong>
-            <p>
-              Biaya perjalanan, alat, model praktik, dan akomodasi—jika
-              diperlukan—dikonfirmasi sebelum pendaftaran.
-            </p>
-          </div>
-          <a
-            className="text-link"
-            href={`https://wa.me/${data.whatsapp}`}
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Lebih nyaman lewat WhatsApp? ↗
-          </a>
+          <WhatsAppLink phone={data.whatsapp}>Pilih chat WhatsApp</WhatsAppLink>
         </div>
         <InquiryForm
           programs={programs}

@@ -1,7 +1,9 @@
+import { ProgramGroups } from "@/components/program-groups";
+import { WhatsAppLink } from "@/components/whatsapp-link";
 import Link from "next/link";
 import { ArrowUpRight, MapPin } from "lucide-react";
 import { readContent } from "@/lib/store";
-import { CTA, ProgramCard, PublicFrame } from "@/components/site";
+import { CTA, PublicFrame } from "@/components/site";
 export const dynamic = "force-dynamic";
 export default async function Home() {
   const { data: c } = await readContent();
@@ -23,9 +25,7 @@ export default async function Home() {
               <Link className="button" href="/#program">
                 Lihat pilihan kelas <ArrowUpRight size={18} />
               </Link>
-              <Link className="text-link" href="/konsultasi">
-                Tanya jadwal & lokasi
-              </Link>
+              <WhatsAppLink phone={c.whatsapp} />
             </div>
           </div>
           {c.portrait ? (
@@ -35,19 +35,16 @@ export default async function Home() {
             </figure>
           ) : (
             <aside className="class-note">
-              <span className="eyebrow">SEBELUM MEMILIH KELAS</span>
+              <span className="eyebrow">BELAJAR SATU PER SATU</span>
               <p>
-                Ingin mulai dari dasar, <br />
-                atau mendalami <br />
-                <em>teknik tertentu?</em>
+                Fokus ke teknik
+                <br />
+                yang ingin kamu pelajari.
               </p>
               <span>
-                Kita bicarakan dulu pengalaman dan tujuan belajarmu. Tidak perlu
-                langsung menentukan program.
+                Materi, jadwal, dan lokasi dibicarakan bersama sebelum
+                mendaftar.
               </span>
-              <Link className="text-link" href="/konsultasi">
-                Konsultasi dengan Shinta <ArrowUpRight size={16} />
-              </Link>
             </aside>
           )}
           <dl className="hero-facts">
@@ -80,13 +77,7 @@ export default async function Home() {
               konfirmasi detailnya saat konsultasi.
             </p>
           </div>
-          <div className="program-grid">
-            {c.programs
-              .filter((p) => p.status === "published")
-              .map((p, i) => (
-                <ProgramCard key={p.id} program={p} index={i} />
-              ))}
-          </div>
+          <ProgramGroups programs={c.programs} />
           <p className="muted">
             Belum yakin memilih?{" "}
             <Link className="inline-link" href="/konsultasi">
@@ -98,9 +89,7 @@ export default async function Home() {
           <div className="educator-heading">
             <span className="eyebrow">PENGAJAR</span>
             <h2>
-              Belajar langsung
-              <br />
-              bersama
+              Kenal pengajarnya.
               <br />
               <em>{c.name}.</em>
             </h2>
@@ -116,6 +105,36 @@ export default async function Home() {
             </Link>
           </div>
         </section>
+        {c.gallery.some((item) => item.image) && (
+          <section className="section" id="galeri">
+            <span className="eyebrow">DOKUMENTASI</span>
+            <h2>Karya & proses belajar.</h2>
+            <div className="gallery">
+              {c.gallery
+                .filter((g) => g.image)
+                .map((g, i) => (
+                  <figure key={i}>
+                    <img src={g.image} alt={g.caption} loading="lazy" />
+                    <figcaption>{g.caption}</figcaption>
+                  </figure>
+                ))}
+            </div>
+          </section>
+        )}
+        {!!c.testimonials.length && (
+          <section className="section testimonials">
+            <span className="eyebrow">CERITA PESERTA</span>
+            <h2>Cerita perjalanan mereka.</h2>
+            <div className="steps">
+              {c.testimonials.map((t, i) => (
+                <blockquote key={i}>
+                  <p>“{t.quote}”</p>
+                  <cite>{t.name}</cite>
+                </blockquote>
+              ))}
+            </div>
+          </section>
+        )}
         <section className="section process">
           <span className="eyebrow">CARA MENDAFTAR</span>
           <h2>
@@ -149,36 +168,6 @@ export default async function Home() {
             ))}
           </div>
         </section>
-        {!!c.gallery.length && (
-          <section className="section" id="galeri">
-            <span className="eyebrow">DOKUMENTASI</span>
-            <h2>Karya & proses belajar.</h2>
-            <div className="gallery">
-              {c.gallery
-                .filter((g) => g.image)
-                .map((g, i) => (
-                  <figure key={i}>
-                    <img src={g.image} alt={g.caption} loading="lazy" />
-                    <figcaption>{g.caption}</figcaption>
-                  </figure>
-                ))}
-            </div>
-          </section>
-        )}
-        {!!c.testimonials.length && (
-          <section className="section testimonials">
-            <span className="eyebrow">CERITA PESERTA</span>
-            <h2>Cerita perjalanan mereka.</h2>
-            <div className="steps">
-              {c.testimonials.map((t, i) => (
-                <blockquote key={i}>
-                  <p>“{t.quote}”</p>
-                  <cite>{t.name}</cite>
-                </blockquote>
-              ))}
-            </div>
-          </section>
-        )}
         <section className="section faq" id="faq">
           <div>
             <span className="eyebrow">SEBELUM MENDAFTAR</span>

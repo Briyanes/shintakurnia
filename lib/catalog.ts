@@ -58,3 +58,36 @@ export const legacyRedirects = [
     permanent: true,
   },
 ];
+
+// Group only by the existing CMS level; unknown levels are never guessed.
+export function learningGroups(programs: Program[]) {
+  const visible = publishedPrograms(programs);
+  const basic = visible.filter((p) =>
+    /^(fundamental|pemula|basic|dasar)$/i.test(p.level.trim()),
+  );
+  const deeper = visible.filter((p) =>
+    /^(intermediate|advanced|lanjutan)$/i.test(p.level.trim()),
+  );
+  const assigned = new Set([...basic, ...deeper].map((p) => p.id));
+  return [
+    {
+      id: "dasar",
+      title: "Materi dasar",
+      description: "Program dengan level fundamental atau pemula.",
+      programs: basic,
+    },
+    {
+      id: "pendalaman",
+      title: "Pendalaman teknik",
+      description:
+        "Program berlevel intermediate atau lanjutan. Diskusikan bekal yang dibutuhkan sebelum mendaftar.",
+      programs: deeper,
+    },
+    {
+      id: "konsultasi",
+      title: "Tentukan lewat konsultasi",
+      description: "Level dan pilihan materi dibicarakan bersama Shinta.",
+      programs: visible.filter((p) => !assigned.has(p.id)),
+    },
+  ].filter((group) => group.programs.length);
+}

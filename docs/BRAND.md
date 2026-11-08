@@ -9,3 +9,7 @@ Only optimized web derivatives are in public/brand. The PSD master and mint/pink
 `node scripts/brand-assets.mjs /path/to/original-wordmark.png /path/to/black-white-monogram.png`
 
 This requires dev dependencies installed (`npm ci`). Review the results visually. Brand image metadata uses the exact VERCEL_URL in preview and NEXT_PUBLIC_SITE_URL in production once configured. This does not attach a custom domain or enable indexing before launch gates.
+
+## Audit revision: neutral derivative
+
+Owner approved implementing the audit recommendations. `shinta-kurnia-neutral.png` is a separate derivative: only the lower-right “Online Courses” tagline area (x≥300, y≥195 in the 1600×376 web asset) is made transparent. The tall left initial and main name remain pixel-identical. The existing original wordmark PNG is retained unchanged. Run `node scripts/neutral-logo.mjs` after the original asset generator to recreate the derivative and the updated sharing card. Header/footer/admin use the neutral derivative. Favicon and app icons are unchanged.

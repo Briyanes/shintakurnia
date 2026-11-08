@@ -15,7 +15,7 @@ export function Brand({
     >
       <img
         className="brand-wordmark"
-        src="/brand/shinta-kurnia-wordmark.png"
+        src="/brand/shinta-kurnia-neutral.png"
         alt="Shinta Kurnia"
         width={1600}
         height={376}

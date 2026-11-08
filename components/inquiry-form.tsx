@@ -1,4 +1,7 @@
 "use client";
+
+import { ArrowUpRight } from "lucide-react";
+import { WhatsAppLink } from "./whatsapp-link";
 import { useState } from "react";
 import type { FormEvent } from "react";
 import type { Program } from "@/lib/schema";
@@ -50,14 +53,13 @@ export default function InquiryForm({
           Permintaan konsultasi berhasil disimpan. Ini belum merupakan
           konfirmasi jadwal atau pendaftaran.
         </p>
-        <a
+        <WhatsAppLink
           className="button"
-          href={`https://wa.me/${whatsapp}?text=${encodeURIComponent(`Halo Shinta, saya telah mengirim formulir konsultasi. Referensi: ${reference}. Saya ingin melanjutkan konsultasi kelas.`)}`}
-          target="_blank"
-          rel="noopener noreferrer"
+          phone={whatsapp}
+          message={`Halo Shinta, saya telah mengirim formulir konsultasi. Referensi: ${reference}. Saya ingin melanjutkan konsultasi kelas.`}
         >
-          Lanjutkan lewat WhatsApp ↗
-        </a>
+          Lanjutkan lewat WhatsApp
+        </WhatsAppLink>
       </div>
     );
   return (
@@ -104,6 +106,7 @@ export default function InquiryForm({
             required
             maxLength={200}
             placeholder="Contoh: Surabaya"
+            aria-describedby="location-note"
           />
         </label>
         <label>
@@ -115,6 +118,10 @@ export default function InquiryForm({
           />
         </label>
       </div>
+      <p id="location-note" className="field-note">
+        Ketersediaan lokasi dan biaya perjalanan, alat, model, atau akomodasi
+        dikonfirmasi sebelum pendaftaran.
+      </p>
       <label>
         Pengalamanmu
         <select name="experience">
@@ -155,7 +162,14 @@ export default function InquiryForm({
         </p>
       )}
       <button className="button" disabled={busy}>
-        {busy ? "Mengirim…" : "Kirim permintaan konsultasi ↗"}
+        {busy ? (
+          "Mengirim…"
+        ) : (
+          <>
+            Kirim permintaan konsultasi{" "}
+            <ArrowUpRight size={16} aria-hidden="true" />
+          </>
+        )}
       </button>
       <small>
         Jangan sertakan informasi pembayaran atau data sensitif lainnya.
