@@ -15,12 +15,11 @@ export function Brand({
     >
       <img
         className="brand-wordmark"
-        src="/brand/shinta-kurnia-neutral.png"
-        alt="Shinta Kurnia"
-        width={1600}
-        height={376}
+        src="/brand/header-educator.png"
+        alt="Shinta Kurnia — Hair Educator"
+        width={777}
+        height={155}
       />
-      <span aria-hidden="true">{label}</span>
     </Link>
   );
 }

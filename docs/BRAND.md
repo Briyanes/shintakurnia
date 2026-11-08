@@ -13,3 +13,9 @@ This requires dev dependencies installed (`npm ci`). Review the results visually
 ## Audit revision: neutral derivative
 
 Owner approved implementing the audit recommendations. `shinta-kurnia-neutral.png` is a separate derivative: only the lower-right “Online Courses” tagline area (x≥300, y≥195 in the 1600×376 web asset) is made transparent. The tall left initial and main name remain pixel-identical. The existing original wordmark PNG is retained unchanged. Run `node scripts/neutral-logo.mjs` after the original asset generator to recreate the derivative and the updated sharing card. Header/footer/admin use the neutral derivative. Favicon and app icons are unchanged.
+
+## Approved horizontal educator lockup and transparent favicon
+
+The owner approved the displayed mockup: original tall SK at left, original name lettering at right and newly typeset HAIR EDUCATOR below the name. `scripts/header-brand.mjs` recreates the exact arrangement from the retained original web wordmark. Header/footer/admin use `header-educator.png`; the separate full-width tagline is removed to avoid duplication. Original wordmark and previous derivatives are retained.
+
+Favicons now use the freestanding original SK on a transparent canvas, not the round badge, with 16/32/48/192/512 PNG derivatives. Black artwork for light browser chrome and light artwork for dark chrome preserve the same alpha channel. Metadata selects 32px variants by color scheme; a generic transparent 32px PNG and transparent ICO provide fallbacks. Larger transparent PNGs are also exported for download. Apple/manifest home-screen icons are unchanged (they are not browser favicons). Browser cache and theme selection can differ; verify actual tab chrome after launch. No custom domain changed.

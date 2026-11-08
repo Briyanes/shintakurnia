@@ -322,3 +322,37 @@ test("primary text, muted text and button foreground colors meet normal-text AA 
     assert.ok((values[0] + 0.05) / (values[1] + 0.05) >= 4.5);
   }
 });
+
+test("approved educator lockup and favicon PNGs have transparent backgrounds and theme variants", async () => {
+  const sharp = (await import("sharp")).default;
+  const { brandMetadata } = await import("../lib/brand-metadata");
+  const logo = await sharp("public/brand/header-educator.png").metadata();
+  assert.equal(logo.height, 155);
+  assert.equal(logo.hasAlpha, true);
+  for (const size of [16, 32, 48, 192, 512]) {
+    const dark = await sharp(`public/brand/sk-transparent-${size}.png`)
+      .ensureAlpha()
+      .raw()
+      .toBuffer({ resolveWithObject: true });
+    const light = await sharp(`public/brand/sk-light-${size}.png`)
+      .ensureAlpha()
+      .raw()
+      .toBuffer({ resolveWithObject: true });
+    assert.equal(dark.info.width, size);
+    assert.equal(dark.info.height, size);
+    let visible = 0,
+      transparent = 0;
+    for (let i = 0; i < dark.data.length; i += 4) {
+      assert.equal(dark.data[i + 3], light.data[i + 3]);
+      if (dark.data[i + 3] === 0) transparent++;
+      else visible++;
+    }
+    assert.ok(visible > 0);
+    assert.ok(transparent > (size * size) / 3);
+    assert.equal(dark.data[3], 0);
+  }
+  const metadata = JSON.stringify(brandMetadata({}));
+  assert.ok(metadata.includes("/brand/sk-transparent-32.png"));
+  assert.ok(metadata.includes("/brand/sk-light-32.png"));
+  assert.ok(metadata.includes("prefers-color-scheme: dark"));
+});
