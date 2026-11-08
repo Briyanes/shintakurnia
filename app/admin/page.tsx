@@ -1,3 +1,4 @@
+import { Brand } from "@/components/brand";
 import { cookies } from "next/headers";
 import { configured, COOKIE, validSession } from "@/lib/auth";
 import { readContent, storageReady } from "@/lib/store";
@@ -11,9 +12,7 @@ export default async function Admin() {
   if (!configured() || !storageReady())
     return (
       <main className="admin-setup">
-        <a className="brand" href="/">
-          shinta kurnia<span>PRIVATE DASHBOARD</span>
-        </a>
+        <Brand label="PRIVATE DASHBOARD" />
         <span className="eyebrow">SECURE BY DEFAULT</span>
         <h1>
           Ruang kelolamu

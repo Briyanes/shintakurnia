@@ -1602,3 +1602,53 @@ textarea {
     padding: 10px 14px;
   }
 }
+
+/* Original uploaded wordmark: retain its aspect ratio and never invert the artwork. */
+.brand-artwork {
+  display: inline-flex;
+  flex-direction: column;
+  flex-shrink: 0;
+  gap: 8px;
+  align-items: flex-start;
+  line-height: 1;
+}
+.brand-artwork .brand-wordmark {
+  width: 196px;
+  height: auto;
+  object-fit: contain;
+}
+.brand-artwork span {
+  margin-top: 0;
+  font-size: 8px;
+  letter-spacing: 2.1px;
+  line-height: 1.4;
+}
+.brand-compact .brand-wordmark {
+  width: 180px;
+}
+.admin-sidebar .brand-artwork .brand-wordmark {
+  width: 100%;
+  max-width: 180px;
+}
+@media (max-width: 1050px) {
+  .admin-sidebar .brand-artwork .brand-wordmark {
+    max-width: 153px;
+  }
+}
+@media (max-width: 700px) {
+  .header .brand-artwork .brand-wordmark {
+    width: 132px;
+  }
+  .header .brand-artwork span {
+    font-size: 6px;
+    letter-spacing: 1.7px;
+  }
+  .header .brand-artwork {
+    gap: 7px;
+  }
+}
+@media (max-width: 360px) {
+  .header .brand-artwork .brand-wordmark {
+    width: 126px;
+  }
+}

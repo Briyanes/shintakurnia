@@ -1,4 +1,6 @@
 "use client";
+
+import { Brand } from "./brand";
 import { useState } from "react";
 import type { Content, Program } from "@/lib/schema";
 import { ProgramCard } from "./site";
@@ -27,9 +29,7 @@ export function Login() {
     [busy, setBusy] = useState(false);
   return (
     <main className="admin-setup">
-      <a className="brand" href="/">
-        shinta kurnia<span>PRIVATE DASHBOARD</span>
-      </a>
+      <Brand label="PRIVATE DASHBOARD" />
       <span className="eyebrow">WELCOME BACK</span>
       <h1>
         Ruang untuk
@@ -240,9 +240,7 @@ export default function Dashboard({
   return (
     <div className="dashboard">
       <aside className="admin-sidebar">
-        <a className="brand" href="/">
-          shinta kurnia<span>YOUR CREATIVE SPACE</span>
-        </a>
+        <Brand label="YOUR CREATIVE SPACE" compact />
         <nav aria-label="Dashboard">
           {tabs.map((t) => (
             <button

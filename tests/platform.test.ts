@@ -161,3 +161,43 @@ test("category catalogs show only published matching programs and support empty 
   assert.deepEqual(publishedPrograms(programs, "cutting"), []);
   assert.equal(publishedPrograms(programs).length, 3);
 });
+
+test("brand icons, manifest and social preview are correctly sized and deployed-origin aware", async () => {
+  const sharp = (await import("sharp")).default;
+  const { readFile } = await import("node:fs/promises");
+  const { brandMetadata } = await import("../lib/brand-metadata");
+  const manifest = (await import("../app/manifest")).default();
+  for (const size of [16, 32, 48, 180, 192, 512]) {
+    const m = await sharp(`public/brand/icon-${size}.png`).metadata();
+    assert.equal(m.width, size);
+    assert.equal(m.height, size);
+  }
+  const social = await sharp("public/brand/social-card.png").metadata();
+  assert.equal(social.width, 1200);
+  assert.equal(social.height, 630);
+  const logo = await sharp(
+    "public/brand/shinta-kurnia-wordmark.png",
+  ).metadata();
+  assert.equal(logo.width, 1600);
+  assert.equal(logo.height, 376);
+  assert.equal(logo.hasAlpha, true);
+  const ico = await readFile("public/favicon.ico");
+  assert.equal(ico.readUInt16LE(2), 1);
+  assert.equal(ico.readUInt16LE(4), 3);
+  assert.equal(manifest.display, "browser");
+  assert.equal(manifest.icons?.length, 2);
+  const preview = brandMetadata({
+    VERCEL_ENV: "preview",
+    VERCEL_URL: "preview.example.test",
+    NEXT_PUBLIC_SITE_URL: "https://production.example.test",
+  });
+  assert.equal(preview.metadataBase?.origin, "https://preview.example.test");
+  assert.equal(
+    brandMetadata({
+      VERCEL_ENV: "production",
+      NEXT_PUBLIC_SITE_URL: "https://production.example.test",
+    }).metadataBase?.origin,
+    "https://production.example.test",
+  );
+  assert.equal(brandMetadata({}).metadataBase?.origin, "http://localhost:3000");
+});

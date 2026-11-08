@@ -1,3 +1,4 @@
+import { Brand } from "./brand";
 import Link from "next/link";
 import { ArrowUpRight, Scissors, Sparkles, ArrowRight } from "lucide-react";
 import type { Content, Program } from "@/lib/schema";
@@ -8,9 +9,7 @@ export function Header() {
         Lewati ke konten
       </a>
       <header className="header">
-        <Link className="brand" href="/">
-          shinta kurnia<span>HAIR EDUCATOR</span>
-        </Link>
+        <Brand />
         <nav aria-label="Navigasi utama">
           <Link href="/#program">Program</Link>
           <Link href="/#tentang">Tentang</Link>
@@ -27,9 +26,7 @@ export function Footer() {
   return (
     <footer>
       <div>
-        <Link className="brand" href="/">
-          shinta kurnia<span>LEARN. CREATE. GROW.</span>
-        </Link>
+        <Brand label="LEARN. CREATE. GROW." />
         <p>Ruang untuk belajar, bertumbuh, dan berkarya.</p>
       </div>
       <div className="footer-links">
