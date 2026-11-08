@@ -1813,12 +1813,28 @@ em {
   display: grid;
   grid-template-columns: 60px 1fr;
   gap: 20px;
-  transition: background 0.15s;
+  transition: border-color 0.15s;
 }
-.program-card:hover {
+/* Touch browsers may retain :hover after tapping; never tint the card. */
+.program-card:hover,
+.program-card:active {
   transform: none;
   box-shadow: none;
-  background: #ecefe7;
+  background: transparent;
+}
+@media (hover: hover) and (pointer: fine) {
+  .program-card:hover {
+    border-bottom-color: var(--ink);
+  }
+  .program-card:hover h3 {
+    text-decoration: underline;
+    text-underline-offset: 5px;
+    text-decoration-thickness: 1px;
+  }
+}
+.program-card:focus-visible {
+  outline: 2px solid var(--ink);
+  outline-offset: 5px;
 }
 .program-number {
   font-family: var(--serif);

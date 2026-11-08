@@ -356,3 +356,25 @@ test("approved educator lockup and favicon PNGs have transparent backgrounds and
   assert.ok(metadata.includes("/brand/sk-light-32.png"));
   assert.ok(metadata.includes("prefers-color-scheme: dark"));
 });
+
+test("program cards never tint their background on touch hover or active state", async () => {
+  const { readFile } = await import("node:fs/promises");
+  const css = await readFile("app/globals.css", "utf8");
+  const blocks = [...css.matchAll(/([^{}]+)\{([^{}]*)\}/g)].filter(
+    ([, selector]) => selector.includes(".program-card"),
+  );
+  const backgrounds = blocks.flatMap(([, selector, body]) =>
+    [...body.matchAll(/(?:^|;)\s*background(?:-color)?\s*:\s*([^;]+);/g)].map(
+      (match) => ({ selector, value: match[1].trim() }),
+    ),
+  );
+  assert.ok(backgrounds.length);
+  // Old base declarations may exist; the current hover/active override must stay transparent.
+  const interactive = backgrounds.filter(
+    (b) => b.selector.includes(":hover") || b.selector.includes(":active"),
+  );
+  assert.ok(interactive.length);
+  assert.ok(interactive.every((b) => b.value === "transparent"));
+  assert.ok(css.includes(".program-card:focus-visible"));
+  assert.ok(css.includes("@media (hover: hover) and (pointer: fine)"));
+});
