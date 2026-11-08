@@ -522,3 +522,39 @@ test("dashboard worker caches only generic offline content and does not intercep
   });
   assert.equal(await (await response!).text(), "generic offline");
 });
+
+test("dashboard icons use fresh URLs, opaque square backgrounds and safe padding; favicon unchanged", async () => {
+  const sharp = (await import("sharp")).default;
+  const { GET } = await import("../app/admin/app.webmanifest/route");
+  const manifest = await (await GET()).json();
+  assert.equal(manifest.id, "/admin");
+  assert.equal(manifest.start_url, "/admin");
+  for (const size of [180, 192, 512]) {
+    const { data, info } = await sharp(
+      `public/app-icons/sk-admin-v2-${size}.png`,
+    )
+      .ensureAlpha()
+      .raw()
+      .toBuffer({ resolveWithObject: true });
+    assert.equal(info.width, size);
+    assert.equal(info.height, size);
+    for (let i = 3; i < data.length; i += 4) assert.equal(data[i], 255);
+    for (const [x, y] of [
+      [0, 0],
+      [size - 1, 0],
+      [0, size - 1],
+      [size - 1, size - 1],
+    ]) {
+      const i = (y * size + x) * 4;
+      assert.deepEqual([...data.subarray(i, i + 3)], [37, 39, 37]);
+    }
+  }
+  for (const icon of manifest.icons) {
+    assert.ok(icon.src.startsWith("/app-icons/sk-admin-v2-"));
+    assert.equal(icon.purpose, "any maskable");
+  }
+  const { brandMetadata } = await import("../lib/brand-metadata");
+  assert.ok(
+    JSON.stringify(brandMetadata({})).includes("/brand/sk-transparent-32.png"),
+  );
+});

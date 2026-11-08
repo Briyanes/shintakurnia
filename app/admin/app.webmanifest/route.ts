@@ -14,16 +14,16 @@ export function GET() {
       theme_color: "#252725",
       icons: [
         {
-          src: "/brand/icon-192.png",
+          src: "/app-icons/sk-admin-v2-192.png",
           sizes: "192x192",
           type: "image/png",
-          purpose: "any",
+          purpose: "any maskable",
         },
         {
-          src: "/brand/icon-512.png",
+          src: "/app-icons/sk-admin-v2-512.png",
           sizes: "512x512",
           type: "image/png",
-          purpose: "any",
+          purpose: "any maskable",
         },
       ],
     }),
